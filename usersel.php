@@ -9,13 +9,14 @@ include_once 'includes/init.php';
 $users = getGetValue ( 'users' );
 $form = getGetValue ( 'form' );
 $listid = getGetValue ( 'listid' );
-$progErrStr = translate ( 'Program Error No XXX specified!' );
+$progErrStr = translate ( 'Program Error No "XXX" specified!' );
+
 if ( empty ( $form ) ) {
-  echo str_replace ( 'XXX', translate ( 'form' ), $progErrStr );
+  echo str_replace ( 'XXX', 'form', $progErrStr );
   exit;
 }
 if ( empty ( $listid ) ) {
-  echo str_replace ( 'XXX', translate ( $listid,0,'N' ), $progErrStr );
+  echo str_replace ( 'XXX', 'listid', $progErrStr );
   exit;
 }
 
