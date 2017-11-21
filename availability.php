@@ -1,4 +1,4 @@
-<?php // $Id: availability.php,v 1.27 2009/11/22 16:47:44 bbannon Exp $
+<?php
 /**
  * Page Description:
  * Display a timebar view of a single day.
@@ -27,18 +27,19 @@ $day = getGetValue ( 'day' );
 
 // Input args in URL.
 // users: list of comma-separated users.
-$noXStr = translate ( 'Program Error No XXX specified!' );
+$noXStr = translate ( 'Program Error&#58; No "XXX" specified!' );
+
 if ( empty ( $users ) ) {
-  echo str_replace ( 'XXX', translate ( 'user' ), $noXStr );
+  echo str_replace ( 'XXX', 'user', $noXStr );
   exit;
 } elseif ( empty ( $year ) ) {
-  echo str_replace ( 'XXX', translate ( 'year' ), $noXStr );
+  echo str_replace ( 'XXX', 'year', $noXStr );
   exit;
 } elseif ( empty ( $month ) ) {
-  echo str_replace ( 'XXX', translate ( 'month' ), $noXStr );
+  echo str_replace ( 'XXX', 'month', $noXStr );
   exit;
 } elseif ( empty ( $day ) ) {
-  echo str_replace ( 'XXX', translate ( 'day' ), $noXStr );
+  echo str_replace ( 'XXX', 'day', $noXStr );
   exit;
 }
 
