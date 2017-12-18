@@ -1,6 +1,4 @@
 #!/usr/bin/perl
-# $Id: update_translation.pl,v 1.41 2008/10/14 01:16:22 bbannon Exp $
-#
 # This tool will update a translation file by doing the following:
 # - Phrases are organized by the page on which they first appear.
 # - When a missing translation is found, the phrase can optionally have
@@ -48,11 +46,11 @@ sub find_pgm_files {
 # if the filename ends in .class or .php, add it to @files.
   push( @files, "$File::Find::name" )
     if ( $_ =~ /\.(class|php)$/i
-    && $File::Find::dir !~ /(fckeditor|htmlarea|phpmailer)/i );
+      && $File::Find::dir !~ /(ckeditor|htmlarea|phpmailer)/i );
 }
 
 $base_dir  = '..';
-$trans_dir = '../translations';
+$trans_dir = "$base_dir/translations";
 
 $base_trans_file = "$trans_dir/English-US.txt";
 $plugin          = '';
@@ -67,23 +65,19 @@ $verbose      = 0;
 for ( $i = 0; $i < @ARGV; $i++ ) {
   if ( $ARGV[ $i ] eq '-p' ) {
     $plugin = $ARGV[ ++$i ];
-  }
-  elsif ( $ARGV[ $i ] eq '-b' ) {
+  } elsif ( $ARGV[ $i ] eq '-b' ) {
     $save_backup++;
-  }
-  elsif ( $ARGV[ $i ] eq '-d' ) {
+  } elsif ( $ARGV[ $i ] eq '-d' ) {
     $show_dups++;
-  }
-  elsif ( $ARGV[ $i ] eq '-m' ) {
+  } elsif ( $ARGV[ $i ] eq '-m' ) {
     $show_missing--;
-  }
-  elsif ( $ARGV[ $i ] eq '-v' ) {
+  } elsif ( $ARGV[ $i ] eq '-v' ) {
     $verbose++;
-  }
-  else {
+  } else {
     $infile = $ARGV[ $i ];
   }
 }
+$infile = 'English-US.txt' if ( !$infile );
 
 die "Usage: $this [-p plugin] language\n" if ( $infile eq '' );
 
@@ -106,8 +100,6 @@ if ( -f "$trans_dir/$infile" || -f "$p_trans_dir/$infile" ) {
 }
 
 #print "infile: $infile\nb_infile: $b_infile\ntrans_dir: $trans_dir\n";
-
-die "Usage: $this [-p plugin] language\n" if ( !-f $infile );
 
 print "Translation file: $infile\n" if ( $verbose );
 
@@ -178,12 +170,9 @@ if ( -f $infile ) {
     }
     next if ( /^#/ );
     $in_header = 0;
+
     if ( /\s*:\s*/ ) {
-      $abbrev = $`;
-      $temp   = $';
-      $temp   = '='
-        if ( $infile !~ /english-us/i && $base_trans{ $abbrev } eq $temp );
-      $trans{ $abbrev } = $temp;
+      $trans{ $` } = $';
     }
   }
 }
@@ -241,19 +230,14 @@ if ( $plugin eq '' ) {
   print OUT ( $infile !~ /english-us/i ? '
 
 ' . ( '#' x 80 ) . '
-#                       DO NOT "TRANSLATE" THIS SECTION                        #
+#' . ( ' ' x 23 ) . 'DO NOT "TRANSLATE" THIS SECTION' . ( ' ' x 24 ) . '#
 ' . ( '#' x 80 ) . '
 
-# A lone equal sign "=" to the right of the colon, such as "charset: =",
-# indicates that the "translation" is identical to the English text.
-
-# Specify a charset (will be sent within meta tag for each page).
-' : '' ) . '
+# Specify a charset (will be sent within meta tag for each page).' : '' ) . '
 charset: ' . $trans{ 'charset' } . ( $infile !~ /english-us/i ? '
 
 # "direction" need only be changed if using a right to left language.
-# Options are: ltr (left to right, default) or rtl (right to left).
-' : '' ) . '
+# Options are: ltr (left to right, default) or rtl (right to left).' : '' ) . '
 direction: ' . $trans{ 'direction' } . ( $infile !~ /english-us/i ? '
 
 # In the date formats, change only the format of the terms.
@@ -332,7 +316,7 @@ foreach $f ( @files ) {
 
 print STDERR (
   !$notfound
-  ? "All text was found in $infile.  Good job :-)\n"
+  ? "All text was found in $infile. Good job :-)\n"
   : "$notfound translation(s) missing.\n"
 );
 
