@@ -1,26 +1,19 @@
-<?php // $Id: translate.js.php,v 1.8 2010/09/16 01:20:22 cknudsen Exp $
-defined( '_ISVALID' ) or die( 'You cannot access this file directly!' );
+<?php
+defined ( '_ISVALID' ) or die ( 'You cannot access this file directly!' );
 
 global $GROUPS_ENABLED, $WORK_DAY_END_HOUR, $WORK_DAY_START_HOUR;
 
-$tmp1 =
-$tmp2 = '';
-
-foreach( array( 'SU','MO','TU','WE','TH','FR','SA' ) as $b ) {
-  $tmp1 .= '\'' . $b . '\',';
-  $tmp2 .= '\'' . translate( $b ) . '\',';
-}
-echo 'var
-  allowCustomColors= "' . $ALLOW_COLOR_CUSTOMIZATION . '",
-  bydayLabels      = [' . $tmp1 . '],
-  bydayTrans       = [' . $tmp2 . '],
-  evtEditTabs      = "' .
-    ( empty ( $GLOBALS['EVENT_EDIT_TABS'] ) ? 'Y' : $GLOBALS['EVENT_EDIT_TABS'] ) . '",
-  groupsEnabled    = "' . $GROUPS_ENABLED . '",
-  timeFormat       = "' . $GLOBALS['TIME_FORMAT'] . '",
-  workEndHour      = "' . $WORK_DAY_END_HOUR . '",
-  workStartHour    = "' . $WORK_DAY_START_HOUR . '",
-  xlate            = [];
+echo "let
+  allowCustomColors= '$ALLOW_COLOR_CUSTOMIZATION',
+  byday_labels     = ['" . implode ( "','",$byday_labels ) . "'],
+  byday_names      = ['" . implode ( "','",$byday_names ) . "'],
+  evtEditTabs      = '" . ( empty ( $GLOBALS['EVENT_EDIT_TABS'] ) ? 'Y' : $GLOBALS['EVENT_EDIT_TABS'] ) . "',
+  groupsEnabled    = '$GROUPS_ENABLED',
+  timeFormat       = '" . $GLOBALS['TIME_FORMAT'] . "',
+  today            = " . date () . ",
+  workEndHour      = '$WORK_DAY_END_HOUR',
+  workStartHour    = '$WORK_DAY_START_HOUR',
+  xlate            = [];" . '
 
 // Page: includes/js/admin.js
 xlate[\'endServerURL\']   = \'' . translate( 'Server URL must end with /.', true ) . "'\n;" . '
