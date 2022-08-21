@@ -1337,32 +1337,26 @@ function import_data ( $data, $overwrite, $type, $silent=false ) {
           }
         }
         // test if all Repeat Elements exist
-        $rep_interval = ( ! empty ( $Entry['Repeat']['Interval'] ) ?
-          $Entry['Repeat']['Interval'] : '' );
-        $rep_bymonth = ( ! empty ( $Entry['Repeat']['ByMonth'] ) ?
-          $Entry['Repeat']['ByMonth'] : '' );
-        $rep_byweekno = ( ! empty ( $Entry['Repeat']['ByWeekNo'] ) ?
-          $Entry['Repeat']['ByWeekNo'] : '' );
-        $rep_byyearday = ( ! empty ( $Entry['Repeat']['ByYearDay'] ) ?
-          $Entry['Repeat']['ByYearDay'] : '' );
-        $rep_byweekno = ( ! empty ( $Entry['Repeat']['ByWeekNo'] ) ?
-          $Entry['Repeat']['ByWeekNo'] : '' );
-        $rep_byweekno = ( ! empty ( $Entry['Repeat']['ByWeekNo'] ) ?
-          $Entry['Repeat']['ByWeekNo'] : '' );
-        $rep_byweekno = ( ! empty ( $Entry['Repeat']['ByWeekNo'] ) ?
-          $Entry['Repeat']['ByWeekNo'] : '' );
-        $rep_bymonthday = ( ! empty ( $Entry['Repeat']['ByMonthDay'] ) ?
-          $Entry['Repeat']['ByMonthDay'] : '' );
-        $rep_byday = ( ! empty ( $Entry['Repeat']['ByDay'] ) ?
-          $Entry['Repeat']['ByDay'] : '' );
-        $rep_bysetpos = ( ! empty ( $Entry['Repeat']['BySetPos'] ) ?
-          $Entry['Repeat']['BySetPos'] : '' );
-        $rep_count = ( ! empty ( $Entry['Repeat']['Count'] ) ?
-          $Entry['Repeat']['Count'] : '' );
-        $rep_until = ( ! empty ( $Entry['Repeat']['Until'] ) ?
-          $Entry['Repeat']['Until'] : '' );
-        $rep_wkst = ( ! empty ( $Entry['Repeat']['Wkst'] ) ?
-          $Entry['Repeat']['Wkst'] : '' );
+        $rep_byday = ( empty( $Entry['Repeat']['ByDay'] )
+            ? '' : $Entry['Repeat']['ByDay'] );
+        $rep_bymonth = ( empty( $Entry['Repeat']['ByMonth'] )
+            ? '' : $Entry['Repeat']['ByMonth'] );
+        $rep_bymonthday = ( empty( $Entry['Repeat']['ByMonthDay'] )
+            ? '' : $Entry['Repeat']['ByMonthDay'] );
+        $rep_bysetpos = ( empty( $Entry['Repeat']['BySetPos'] )
+            ? '' : $Entry['Repeat']['BySetPos'] );
+        $rep_byweekno = ( empty( $Entry['Repeat']['ByWeekNo'] )
+            ? '' : $Entry['Repeat']['ByWeekNo'] );
+        $rep_byyearday = ( empty( $Entry['Repeat']['ByYearDay'] )
+            ? '' : $Entry['Repeat']['ByYearDay'] );
+        $rep_count = ( empty( $Entry['Repeat']['Count'] )
+            ? '' : $Entry['Repeat']['Count'] );
+        $rep_interval = ( empty( $Entry['Repeat']['Interval'] )
+            ? '' : $Entry['Repeat']['Interval'] );
+        $rep_until = ( empty( $Entry['Repeat']['Until'] )
+            ? '' : $Entry['Repeat']['Until'] );
+        $rep_wkst = ( empty( $Entry['Repeat']['Wkst'] )
+            ? '' : $Entry['Repeat']['Wkst'] );
 
         $dates = get_all_dates( $Entry['StartTime'],
           RepeatType( $Entry['Repeat']['Frequency'] ), $rep_interval,
@@ -1972,7 +1966,7 @@ function parse_ical ( $cal_file, $source = 'file' ) {
       // send error message if you can
       $errormsg .= "Cannot read file: $e";
       return [];
-    } 
+    }
     if (!$fd && stripos($cal_file, "http") == 0) {
       // Try curl instead so we can ignore cert errors
       $data = curl_download($cal_file);
