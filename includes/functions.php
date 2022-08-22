@@ -4547,12 +4547,12 @@ function print_checkbox( $vals, $id = '', $onchange = '' ) {
     $setting  = $s[$vals[0]];
     $variable = 'admin_' . $vals[0];
   }
-  
+
   if( $SCRIPT == 'pref.php' ) {
     $setting  = $prefarray[$vals[0]];
     $variable = 'pref_' . $vals[0];
   }
-    
+
   $hidden = ( strpos( 'admin.phpref.php', $SCRIPT ) === false ? '' : '
     <input type="hidden" name="' . $variable . '" value="N" />' );
 
@@ -5792,33 +5792,24 @@ function time_to_minutes ( $time ) {
 /**
  * Checks to see if two events overlap.
  *
- * @param string $time1      Time 1 in HHMMSS format
- * @param int    $duration1  Duration 1 in minutes
- * @param string $time2      Time 2 in HHMMSS format
- * @param int    $duration2  Duration 2 in minutes
+ * @param  string  $time1      Time 1 in HHMMSS format.
+ * @param  int     $duration1  Duration 1 in minutes.
+ * @param  string  $time2      Time 2 in HHMMSS format.
+ * @param  int     $duration2  Duration 2 in minutes.
  *
- * @return bool  True if the two times overlap, false if they do not.
+ * @return  bool  True if the two times overlap, false if they do not.
  */
 function times_overlap ( $time1, $duration1, $time2, $duration2 ) {
-  $hour1 = intval ( $time1 / 10000 );
-  $min1 = ( $time1 / 100 ) % 100;
-  $hour2 = intval ( $time2 / 10000 );
-  $min2 = ( $time2 / 100 ) % 100;
   // Convert to minutes since midnight and
+  $tmins1start = time_to_minutes ( $time1 );
+  $tmins2start = time_to_minutes ( $time2 );
+
   // remove 1 minute from duration so 9AM-10AM will not conflict with 10AM-11AM.
-  if ( $duration1 > 0 )
-    $duration1 -= 1;
+  $tmins1end = $tmins1start - ( $duration1 > 0 ? 1 : 0 );
+  $tmins2end = $tmins2start - ( $duration2 > 0 ? 1 : 0 );
 
-  if ( $duration2 > 0 )
-    $duration2 -= 1;
-
-  $tmins1start = $hour1 * 60 + $min1;
-  $tmins1end = $tmins1start + $duration1;
-  $tmins2start = $hour2 * 60 + $min2;
-  $tmins2end = $tmins2start + $duration2;
-
-  return ( ( $tmins1start >= $tmins2end ) || ( $tmins2start >= $tmins1end )
-    ? false : true );
+  return ( $tmins1start >= $tmins2end || $tmins2start >= $tmins1end
+      ? false : true);
 }
 
 /**
