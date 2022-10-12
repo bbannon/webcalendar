@@ -14,7 +14,7 @@
     ],
     "require": {
         "phpmailer/phpmailer": "^6.5",
-        "ckeditor/ckeditor": "4.19.*",
+        "ckeditor/ckeditor": "4.20.*",
         "components/jquery": "3.6.*",
         "twbs/bootstrap": "5.*",
         "twbs/bootstrap-icons": "1.8.1",
