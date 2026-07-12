@@ -15,6 +15,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Removed
 
+## [v1.9.20] - 2026-07-12
+
+### Added
+
+- Release-archive smoke test that catches runtime files missing from the release manifest (#666)
+
+### Changed
+
+- Publish the Docker Hub image as a multi-arch manifest (linux/amd64 + linux/arm64), with a manual workflow trigger
+
+### Fixed
+
+- Restore files missing from the release archive that broke installs from the release zip: the MCP subsystem (`includes/mcp-loader.php`, `mcp.php`, loaded on every request), the signed-manifest `Security\*` classes used by the security-audit page, and the TinyMCE rich-text editor assets (#666)
+- Single User Mode now works: `single_user_login` is now read from `settings.php`/env instead of failing with an "Undefined array key" error and a false "You must define single_user_login" message (#666)
+- Accept `Y`/`N` (and anchor the match) for the `single_user` and `readonly` settings, so a hand-edited `single_user: Y` correctly enables single-user mode
+
 ## [v1.9.19] - 2026-06-28
 
 ### Changed
