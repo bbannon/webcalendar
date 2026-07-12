@@ -323,7 +323,7 @@ function do_config($callingFromInstall=false)
     ? '' : $db_password);
 
   $readonly = $settings['readonly'] = (!empty($settings['readonly'])
-    && preg_match('/(1|true|yes|enable|on)/i', $settings['readonly'])) ? 'Y' : 'N';
+    && preg_match('/^(1|y|yes|true|enable|on)$/i', trim($settings['readonly']))) ? 'Y' : 'N';
 
   if (empty($settings['mode']))
     $settings['mode'] = 'prod';
@@ -331,7 +331,7 @@ function do_config($callingFromInstall=false)
   $run_mode = (preg_match('/(dev)/i', $settings['mode']) ? 'dev' : 'prod');
   $phpdbiVerbose = ($run_mode == 'dev');
   $single_user = $settings['single_user'] = (!empty($settings['single_user'])
-    && preg_match('/(1|true|yes|enable|on)/i', $settings['single_user'])) ? 'Y' : 'N';
+    && preg_match('/^(1|y|yes|true|enable|on)$/i', trim($settings['single_user']))) ? 'Y' : 'N';
   if (isset($single_user) && $single_user == 'Y') {
     $single_user_login = $settings['single_user_login'] ?? '';
     if (!$callingFromInstall) {
