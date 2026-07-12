@@ -5,6 +5,9 @@ on:
     branches: [ release ]
   release:
     types: [ published ]
+  # Manual trigger so the multi-arch build can be exercised without cutting
+  # a release. Pushes to Docker Hub, so run deliberately.
+  workflow_dispatch:
 
 jobs:
   push_to_registry:
