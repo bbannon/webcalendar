@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- CI: raise the wizard Selenium `wait_for_text` timeout from 15s to 45s for the MySQL and PostgreSQL install tests, fixing a flaky `TimeoutException` on the table-creating "Finish" step
+
 ### Removed
 
 ## [v1.9.20] - 2026-07-12
