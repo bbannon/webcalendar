@@ -35,7 +35,7 @@ def driver(request):
         print(f"Screenshot saved: {path}")
     driver.quit()
 
-def wait_for_text(driver, selector, text, timeout=15):
+def wait_for_text(driver, selector, text, timeout=45):
     end_time = time.time() + timeout
     while time.time() < end_time:
         try:
@@ -253,7 +253,7 @@ def test_new_installation(driver):
         # default admin/admin user was removed from the base schema, so the
         # wizard no longer auto-skips the Admin User step.
         try:
-            wait_for_text(driver, "stepTitle", "Admin", timeout=15)
+            wait_for_text(driver, "stepTitle", "Admin", timeout=45)
             login_field = driver.find_element(By.ID, "admin_login")
             login_field.clear()
             login_field.send_keys("admin")

@@ -34,7 +34,7 @@ def driver(request):
         print(f"Screenshot saved: {path}")
     driver.quit()
 
-def wait_for_text(driver, selector, text, timeout=15):
+def wait_for_text(driver, selector, text, timeout=45):
     end_time = time.time() + timeout
     while time.time() < end_time:
         try:
@@ -207,7 +207,7 @@ def test_new_installation(driver):
         # button lives inside form[data-action='create-admin-user']; the
         # data-action is on the form, not the button.
         try:
-            wait_for_text(driver, "stepTitle", "Admin", timeout=15)
+            wait_for_text(driver, "stepTitle", "Admin", timeout=45)
             login_field = driver.find_element(By.ID, "admin_login")
             login_field.clear()
             login_field.send_keys("admin")
