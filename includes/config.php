@@ -34,6 +34,7 @@ $config_possible_settings = [
   'db_type'          => 'string',
   'readonly'         => 'string', # "Y" or "N"
   'single_user'      => 'string', # "Y" or "N"
+  'single_user_login' => 'string', # login name when single_user is "Y"
   'use_http_auth'    => 'boolean',
   'user_inc'         => 'string',
   'config_inc'       => 'string',
@@ -332,7 +333,7 @@ function do_config($callingFromInstall=false)
   $single_user = $settings['single_user'] = (!empty($settings['single_user'])
     && preg_match('/(1|true|yes|enable|on)/i', $settings['single_user'])) ? 'Y' : 'N';
   if (isset($single_user) && $single_user == 'Y') {
-    $single_user_login = $settings['single_user_login'];
+    $single_user_login = $settings['single_user_login'] ?? '';
     if (!$callingFromInstall) {
       if (empty($single_user_login))
         die_miserable_death(str_replace(
