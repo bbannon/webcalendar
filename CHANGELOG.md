@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+### Removed
+
+## [v1.9.21] - 2026-07-13
+
+### Added
+
+### Changed
+
+### Fixed
+
 - Release ZIP now includes the complete `wizard/` directory (installer and DB-upgrade path). It had been omitted from the release manifest since 1.9.13, so ZIP-based upgrades silently skipped required DB migrations (#667)
 - CI: raise the wizard Selenium `wait_for_text` timeout from 15s to 45s for the MySQL and PostgreSQL install tests, fixing a flaky `TimeoutException` on the table-creating "Finish" step
 
