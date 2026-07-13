@@ -55,9 +55,10 @@ final class ReleaseArchiveSmokeTest extends TestCase
   /**
    * (a) Boot the staged init.php and assert no bootstrap require is missing.
    *
-   * The staged tree has no settings.php and no wizard/, so config's
-   * do_config() (reached at init.php:65) dies cleanly right after the
-   * bootstrap require chain has run. A file missing from that chain — like
+   * The staged tree has no settings.php, so config's do_config() (reached
+   * at init.php:65) dies cleanly right after the bootstrap require chain has
+   * run — it either redirects to the (now-shipped, issue #667) wizard or
+   * dies for lack of config. A file missing from that chain — like
    * mcp-loader.php at line 63 — surfaces as a "Failed opening required"
    * fatal BEFORE that death, which is exactly what we key on.
    */
