@@ -735,6 +735,134 @@ class WebCalendarMcpTools
             'cal_type' => $repeat_cols['cal_type']
         ];
     }
+
+    #[McpTool(description: 'Update fields of an event the user created')]
+    public function update_event(
+        int $event_id,
+        ?string $name = null,
+        ?string $date = null,
+        $time = null,
+        $duration = null,
+        ?string $description = null,
+        ?string $location = null
+    ): array {
+        if (!is_mcp_write_enabled()) {
+            return ['error' => 'MCP write access is not enabled'];
+        }
+        if ($event_id <= 0) {
+            return ['error' => 'A valid event_id is required'];
+        }
+
+        $owner = $this->eventOwner($event_id);
+        if ($owner === null) {
+            return ['error' => 'Event not found'];
+        }
+        if ($owner !== $this->userLogin) {
+            return ['error' => 'Not authorized to modify this event'];
+        }
+
+        // Only the provided fields are updated (null means "leave unchanged").
+        $sets = [];
+        $vals = [];
+        if ($name !== null) {
+            $sets[] = 'cal_name = ?';
+            $vals[] = $name;
+        }
+        if ($date !== null) {
+            if (!preg_match('/^\d{8}$/', $date)) {
+                return ['error' => 'Date must be in YYYYMMDD format'];
+            }
+            $sets[] = 'cal_date = ?';
+            $vals[] = $date;
+        }
+        if ($time !== null) {
+            if ((string)$time !== '-1' && !preg_match('/^\d{1,6}$/', (string)$time)) {
+                return ['error' => 'Time must be in HHMMSS format or -1 for untimed'];
+            }
+            $sets[] = 'cal_time = ?';
+            $vals[] = (int)$time;
+        }
+        if ($duration !== null) {
+            $sets[] = 'cal_duration = ?';
+            $vals[] = (int)$duration;
+        }
+        if ($description !== null) {
+            $sets[] = 'cal_description = ?';
+            $vals[] = $description;
+        }
+        if ($location !== null) {
+            $sets[] = 'cal_location = ?';
+            $vals[] = $location;
+        }
+
+        if (empty($sets)) {
+            return ['error' => 'No fields to update'];
+        }
+
+        $sets[] = 'cal_mod_date = ?';
+        $vals[] = date('Ymd');
+        $sets[] = 'cal_mod_time = ?';
+        $vals[] = date('His');
+        $vals[] = $event_id;
+
+        $res = dbi_execute(
+            'UPDATE webcal_entry SET ' . implode(', ', $sets) . ' WHERE cal_id = ?',
+            $vals
+        );
+        if (!$res) {
+            return ['error' => 'Failed to update event'];
+        }
+
+        activity_log($event_id, $this->userLogin, $this->userLogin, 'M', 'MCP: Event updated');
+        return ['success' => true, 'event_id' => $event_id];
+    }
+
+    #[McpTool(description: 'Delete an event the user created')]
+    public function delete_event(int $event_id): array
+    {
+        if (!is_mcp_write_enabled()) {
+            return ['error' => 'MCP write access is not enabled'];
+        }
+        if ($event_id <= 0) {
+            return ['error' => 'A valid event_id is required'];
+        }
+
+        $owner = $this->eventOwner($event_id);
+        if ($owner === null) {
+            return ['error' => 'Event not found'];
+        }
+        if ($owner !== $this->userLogin) {
+            return ['error' => 'Not authorized to delete this event'];
+        }
+
+        // Remove the event and every row that references it, including any
+        // recurrence rule and its exceptions/inclusions.
+        dbi_execute('DELETE FROM webcal_entry WHERE cal_id = ?', [$event_id]);
+        dbi_execute('DELETE FROM webcal_entry_user WHERE cal_id = ?', [$event_id]);
+        dbi_execute('DELETE FROM webcal_entry_repeats WHERE cal_id = ?', [$event_id]);
+        dbi_execute('DELETE FROM webcal_entry_repeats_not WHERE cal_id = ?', [$event_id]);
+
+        activity_log($event_id, $this->userLogin, $this->userLogin, 'M', 'MCP: Event deleted');
+        return ['success' => true, 'event_id' => $event_id];
+    }
+
+    /**
+     * Return the login that created an event (cal_create_by), or null if the
+     * event does not exist. Used for the update/delete ownership check.
+     */
+    private function eventOwner(int $event_id): ?string
+    {
+        $res = dbi_execute(
+            'SELECT cal_create_by FROM webcal_entry WHERE cal_id = ?',
+            [$event_id]
+        );
+        if (!$res) {
+            return null;
+        }
+        $row = dbi_fetch_row($res);
+        dbi_free_result($res);
+        return $row ? $row[0] : null;
+    }
 }
 
 // Handle transport based on execution context

@@ -16,6 +16,7 @@ final class McpSchedulingWriteToolsIntegrationTest extends TestCase
 {
     private static $db_file = null;
     private static $api_token = null;
+    private static $bob_token = null;
     private static $server_pid = null;
     private static $server_port = 8103;
 
@@ -45,6 +46,15 @@ final class McpSchedulingWriteToolsIntegrationTest extends TestCase
         $db->exec("INSERT OR REPLACE INTO webcal_config (cal_setting, cal_value) VALUES ('MCP_WRITE_ACCESS', 'Y');");
         $db->exec("INSERT OR REPLACE INTO webcal_config (cal_setting, cal_value) VALUES ('MCP_RATE_LIMIT', '1000');");
         $db->exec(sprintf("UPDATE webcal_user SET cal_api_token = '%s' WHERE cal_login = 'admin';", self::$api_token));
+
+        // A second, non-admin user to exercise the ownership check on
+        // update_event / delete_event.
+        self::$bob_token = bin2hex(random_bytes(32));
+        $db->exec(sprintf(
+            "INSERT INTO webcal_user (cal_login, cal_firstname, cal_lastname, cal_is_admin, cal_api_token) "
+            . "VALUES ('bob', 'Bob', 'Tester', 'N', '%s');",
+            self::$bob_token
+        ));
         $db->close();
 
         $env = sprintf(
@@ -78,8 +88,14 @@ final class McpSchedulingWriteToolsIntegrationTest extends TestCase
         }
     }
 
-    /** Issue a tools/call over HTTP and return the decoded JSON-RPC response. */
+    /** Issue a tools/call over HTTP as the admin user. */
     private function callTool(string $name, array $arguments): array
+    {
+        return $this->callToolAs(self::$api_token, $name, $arguments);
+    }
+
+    /** Issue a tools/call over HTTP as the holder of $token. */
+    private function callToolAs(string $token, string $name, array $arguments): array
     {
         $ch = curl_init();
         curl_setopt_array($ch, [
@@ -94,13 +110,23 @@ final class McpSchedulingWriteToolsIntegrationTest extends TestCase
             ]),
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
-                'X-MCP-Token: ' . self::$api_token,
+                'X-MCP-Token: ' . $token,
             ],
             CURLOPT_TIMEOUT => 10,
         ]);
         $response = curl_exec($ch);
         curl_close($ch);
         return json_decode($response, true) ?? [];
+    }
+
+    private function entryRow(int $calId): ?array
+    {
+        $db = new SQLite3(self::$db_file);
+        $stmt = $db->prepare('SELECT * FROM webcal_entry WHERE cal_id = :id');
+        $stmt->bindValue(':id', $calId, SQLITE3_INTEGER);
+        $row = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+        $db->close();
+        return $row ?: null;
     }
 
     private function repeatRow(int $calId): ?array
@@ -173,5 +199,58 @@ final class McpSchedulingWriteToolsIntegrationTest extends TestCase
         $this->assertArrayHasKey('error', $result);
         $this->assertStringContainsStringIgnoringCase('rrule', $result['error']);
         $this->assertSame($before, $this->entryCount(), 'no event should be created for an invalid RRULE');
+    }
+
+    public function test_update_event_changes_only_provided_fields(): void
+    {
+        $add = $this->callTool('add_recurring_event', [
+            'name' => 'Original Name',
+            'date' => '20260803',
+            'rrule' => 'FREQ=DAILY',
+            'description' => 'keep me',
+        ]);
+        $id = (int)$add['result']['event_id'];
+
+        $upd = $this->callTool('update_event', ['event_id' => $id, 'name' => 'New Name']);
+        $this->assertArrayNotHasKey('error', $upd['result'] ?? [], json_encode($upd));
+
+        $row = $this->entryRow($id);
+        $this->assertSame('New Name', $row['cal_name']);
+        // Unspecified field is untouched (null routing, not blanking).
+        $this->assertSame('keep me', $row['cal_description']);
+    }
+
+    public function test_delete_event_removes_entry_and_repeat_rows(): void
+    {
+        $add = $this->callTool('add_recurring_event', [
+            'name' => 'To Delete',
+            'date' => '20260803',
+            'rrule' => 'FREQ=WEEKLY;BYDAY=TU',
+        ]);
+        $id = (int)$add['result']['event_id'];
+        $this->assertNotNull($this->repeatRow($id));
+
+        $del = $this->callTool('delete_event', ['event_id' => $id]);
+        $this->assertTrue($del['result']['success'] ?? false, json_encode($del));
+
+        $this->assertNull($this->entryRow($id), 'base event should be gone');
+        $this->assertNull($this->repeatRow($id), 'recurrence row should be gone');
+    }
+
+    public function test_delete_event_rejects_non_owner(): void
+    {
+        // admin creates an event; bob must not be able to delete it.
+        $add = $this->callTool('add_recurring_event', [
+            'name' => 'Admin Only',
+            'date' => '20260803',
+            'rrule' => 'FREQ=DAILY',
+        ]);
+        $id = (int)$add['result']['event_id'];
+
+        $del = $this->callToolAs(self::$bob_token, 'delete_event', ['event_id' => $id]);
+        $result = $del['result'] ?? [];
+        $this->assertArrayHasKey('error', $result, 'bob must not delete admin\'s event: ' . json_encode($del));
+        $this->assertStringContainsStringIgnoringCase('authorized', $result['error']);
+        $this->assertNotNull($this->entryRow($id), 'the event must still exist after a rejected delete');
     }
 }

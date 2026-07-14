@@ -7009,6 +7009,52 @@ function mcp_list_tools() {
         ],
         'required' => ['name', 'date', 'rrule']
       ]
+    ],
+    [
+      'name' => 'update_event',
+      'description' => 'Update fields of an event the authenticated user '
+        . 'created. Only the fields provided are changed. Date/time are GMT. '
+        . 'Write access must be enabled.',
+      'inputSchema' => [
+        'type' => 'object',
+        'properties' => [
+          'event_id' => [
+            'type' => 'integer',
+            'description' => 'The cal_id of the event to update'
+          ],
+          'name' => ['type' => 'string', 'description' => 'New event name'],
+          'date' => [
+            'type' => 'string',
+            'description' => 'New date in YYYYMMDD format (GMT)'
+          ],
+          'time' => [
+            'type' => 'string',
+            'description' => 'New start time in HHMMSS (GMT), or -1 for untimed'
+          ],
+          'duration' => [
+            'type' => 'integer',
+            'description' => 'New duration in minutes'
+          ],
+          'description' => ['type' => 'string', 'description' => 'New description'],
+          'location' => ['type' => 'string', 'description' => 'New location']
+        ],
+        'required' => ['event_id']
+      ]
+    ],
+    [
+      'name' => 'delete_event',
+      'description' => 'Delete an event the authenticated user created, '
+        . 'including any recurrence rows. Write access must be enabled.',
+      'inputSchema' => [
+        'type' => 'object',
+        'properties' => [
+          'event_id' => [
+            'type' => 'integer',
+            'description' => 'The cal_id of the event to delete'
+          ]
+        ],
+        'required' => ['event_id']
+      ]
     ]
   ];
 }
@@ -7435,6 +7481,20 @@ function mcp_dispatch_request($request, $tools = null) {
               $tool_args['description'] ?? '',
               $tool_args['location'] ?? ''
             );
+            break;
+          case 'update_event':
+            $result = $tools->update_event(
+              $tool_args['event_id'] ?? 0,
+              $tool_args['name'] ?? null,
+              $tool_args['date'] ?? null,
+              $tool_args['time'] ?? null,
+              $tool_args['duration'] ?? null,
+              $tool_args['description'] ?? null,
+              $tool_args['location'] ?? null
+            );
+            break;
+          case 'delete_event':
+            $result = $tools->delete_event($tool_args['event_id'] ?? 0);
             break;
           default:
             throw new Exception("Unknown tool: $tool_name");

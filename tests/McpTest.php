@@ -77,7 +77,7 @@ final class McpTest extends TestCase
 
   public function test_tools_list_response() {
     $tools = mcp_list_tools();
-    $this->assertCount(7, $tools);
+    $this->assertCount(9, $tools);
 
     $names = array_column($tools, 'name');
     $this->assertContains('list_events', $names);
@@ -87,6 +87,8 @@ final class McpTest extends TestCase
     $this->assertContains('get_availability', $names);
     $this->assertContains('check_conflicts', $names);
     $this->assertContains('add_recurring_event', $names);
+    $this->assertContains('update_event', $names);
+    $this->assertContains('delete_event', $names);
   }
 
   public function test_tools_list_schemas() {

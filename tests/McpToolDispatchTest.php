@@ -29,6 +29,15 @@ final class McpToolDispatchTest extends TestCase
           [$name, $date, $rrule, $time, $duration, $description, $location]];
         return ['success' => true, 'event_id' => 42, 'cal_type' => 'weekly'];
       }
+      public function update_event($event_id, $name, $date, $time, $duration, $description, $location) {
+        $this->calls[] = ['update_event',
+          [$event_id, $name, $date, $time, $duration, $description, $location]];
+        return ['success' => true, 'event_id' => $event_id];
+      }
+      public function delete_event($event_id) {
+        $this->calls[] = ['delete_event', [$event_id]];
+        return ['success' => true, 'event_id' => $event_id];
+      }
     };
   }
 
@@ -101,5 +110,27 @@ final class McpToolDispatchTest extends TestCase
       $tools->calls[0]
     );
     $this->assertSame(42, $resp['result']['event_id']);
+  }
+
+  public function test_update_and_delete_schemas_require_event_id() {
+    $this->assertContains('event_id', get_mcp_tool_schema('update_event')['required']);
+    $this->assertContains('event_id', get_mcp_tool_schema('delete_event')['required']);
+  }
+
+  public function test_dispatch_routes_update_event_passing_null_for_absent_fields() {
+    $tools = $this->stubTools();
+    $this->call($tools, 'update_event', ['event_id' => 7, 'name' => 'Renamed']);
+    // Absent optional fields must arrive as null so the tool leaves them
+    // unchanged (not '' which would blank the column).
+    $this->assertSame(
+      ['update_event', [7, 'Renamed', null, null, null, null, null]],
+      $tools->calls[0]
+    );
+  }
+
+  public function test_dispatch_routes_delete_event_with_id() {
+    $tools = $this->stubTools();
+    $this->call($tools, 'delete_event', ['event_id' => 9]);
+    $this->assertSame(['delete_event', [9]], $tools->calls[0]);
   }
 }
