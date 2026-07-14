@@ -6920,6 +6920,51 @@ function mcp_list_tools() {
         ],
         'required' => ['name', 'date']
       ]
+    ],
+    [
+      'name' => 'get_availability',
+      'description' => 'List the authenticated user\'s busy time blocks within a '
+        . 'date range, for scheduling. Times are GMT (the storage frame); the '
+        . 'caller converts to local as needed. Recurring-event occurrences '
+        . 'beyond their base date are not yet expanded.',
+      'inputSchema' => [
+        'type' => 'object',
+        'properties' => [
+          'start_date' => [
+            'type' => 'string',
+            'description' => 'Start date in YYYYMMDD format'
+          ],
+          'end_date' => [
+            'type' => 'string',
+            'description' => 'End date in YYYYMMDD format'
+          ]
+        ],
+        'required' => ['start_date', 'end_date']
+      ]
+    ],
+    [
+      'name' => 'check_conflicts',
+      'description' => 'Check whether a proposed time slot overlaps any of the '
+        . 'authenticated user\'s existing timed events. Date/time are GMT.',
+      'inputSchema' => [
+        'type' => 'object',
+        'properties' => [
+          'date' => [
+            'type' => 'string',
+            'description' => 'Proposed date in YYYYMMDD format (GMT)'
+          ],
+          'time' => [
+            'type' => 'string',
+            'description' => 'Proposed start time in HHMMSS format (GMT)'
+          ],
+          'duration' => [
+            'type' => 'integer',
+            'description' => 'Proposed duration in minutes',
+            'default' => 0
+          ]
+        ],
+        'required' => ['date', 'time', 'duration']
+      ]
     ]
   ];
 }
@@ -7270,6 +7315,19 @@ function mcp_dispatch_request($request, $tools = null) {
               $tool_args['date'] ?? '',
               $tool_args['description'] ?? '',
               $tool_args['location'] ?? '',
+              $tool_args['duration'] ?? 0
+            );
+            break;
+          case 'get_availability':
+            $result = $tools->get_availability(
+              $tool_args['start_date'] ?? '',
+              $tool_args['end_date'] ?? ''
+            );
+            break;
+          case 'check_conflicts':
+            $result = $tools->check_conflicts(
+              $tool_args['date'] ?? '',
+              $tool_args['time'] ?? '',
               $tool_args['duration'] ?? 0
             );
             break;

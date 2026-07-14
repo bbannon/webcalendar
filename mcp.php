@@ -543,6 +543,100 @@ class WebCalendarMcpTools
 
         return ['success' => true, 'event_id' => $event_id];
     }
+
+    #[McpTool(description: 'List the user\'s busy time blocks in a date range (GMT)')]
+    public function get_availability(string $start_date, string $end_date): array
+    {
+        if (!preg_match('/^\d{8}$/', $start_date) || !preg_match('/^\d{8}$/', $end_date)) {
+            return ['error' => 'Dates must be in YYYYMMDD format'];
+        }
+
+        $sql = "SELECT e.cal_id, e.cal_name, e.cal_date, e.cal_time, e.cal_duration
+                FROM webcal_entry e
+                INNER JOIN webcal_entry_user eu ON e.cal_id = eu.cal_id
+                WHERE eu.cal_login = ? AND e.cal_date BETWEEN ? AND ?
+                ORDER BY e.cal_date, e.cal_time";
+
+        $busy = [];
+        $all_day = [];
+        $res = dbi_execute($sql, [$this->userLogin, $start_date, $end_date]);
+        if ($res) {
+            while ($row = dbi_fetch_row($res)) {
+                // Untimed/all-day events block the whole day; report separately.
+                if ((int)$row[3] === -1) {
+                    $all_day[] = ['id' => $row[0], 'name' => $row[1], 'date' => $row[2]];
+                    continue;
+                }
+                $busy[] = [
+                    'id' => $row[0],
+                    'name' => $row[1],
+                    'date' => $row[2],
+                    'time' => $row[3],
+                    'duration' => (int)$row[4]
+                ];
+            }
+            dbi_free_result($res);
+        }
+
+        // Times are GMT (storage frame); recurring occurrences beyond the base
+        // date are not yet expanded (documented limitation).
+        return ['busy' => $busy, 'all_day' => $all_day, 'timezone' => 'GMT'];
+    }
+
+    #[McpTool(description: 'Check whether a proposed slot overlaps existing timed events (GMT)')]
+    public function check_conflicts(string $date, string $time, int $duration): array
+    {
+        if (!preg_match('/^\d{8}$/', $date)) {
+            return ['error' => 'Date must be in YYYYMMDD format'];
+        }
+        if (!preg_match('/^\d{1,6}$/', (string)$time)) {
+            return ['error' => 'Time must be in HHMMSS format'];
+        }
+
+        $start_min = mcp_datetime_to_min($date, $time);
+        $end_min = $start_min + max(0, (int)$duration);
+
+        // Widen by a day on each side so events that span midnight are seen.
+        $prev = mcp_shift_date($date, -1);
+        $next = mcp_shift_date($date, 1);
+
+        $sql = "SELECT e.cal_id, e.cal_name, e.cal_date, e.cal_time, e.cal_duration
+                FROM webcal_entry e
+                INNER JOIN webcal_entry_user eu ON e.cal_id = eu.cal_id
+                WHERE eu.cal_login = ? AND e.cal_date BETWEEN ? AND ? AND e.cal_time != -1
+                ORDER BY e.cal_date, e.cal_time";
+
+        $events = [];
+        $res = dbi_execute($sql, [$this->userLogin, $prev, $next]);
+        if ($res) {
+            while ($row = dbi_fetch_row($res)) {
+                $s = mcp_datetime_to_min($row[2], $row[3]);
+                $events[] = [
+                    'id' => $row[0],
+                    'name' => $row[1],
+                    'date' => $row[2],
+                    'time' => $row[3],
+                    'duration' => (int)$row[4],
+                    'start' => $s,
+                    'end' => $s + max(0, (int)$row[4])
+                ];
+            }
+            dbi_free_result($res);
+        }
+
+        $conflicts = array_map(
+            fn($c) => [
+                'id' => $c['id'],
+                'name' => $c['name'],
+                'date' => $c['date'],
+                'time' => $c['time'],
+                'duration' => $c['duration']
+            ],
+            mcp_find_conflicts($start_min, $end_min, $events)
+        );
+
+        return ['has_conflict' => !empty($conflicts), 'conflicts' => $conflicts];
+    }
 }
 
 // Handle transport based on execution context
