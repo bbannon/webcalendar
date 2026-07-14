@@ -2,8 +2,18 @@
 #
 # Make sure all PHP files compile successfully.
 
-# Get list of *.php files
-allfiles=`find ../* -name "*.php" -print | grep -v vendor`
+# Resolve the repo root from this script's own location, then run from there.
+# This script lives in tests/, so the repo root is its parent directory.
+# Anchoring to the script location (instead of the caller's CWD) fixes two
+# things: the previous `find ../*` scanned sibling projects when invoked as
+# the documented `./tests/compile_test.sh` from the repo root, and the
+# composer.lock check below needs composer.json in the working directory.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$REPO_ROOT" || exit 1
+
+# Get list of *.php files at the repo root, excluding vendor/
+allfiles=`find . -name "*.php" -not -path './vendor/*' -print`
 
 tmp=/tmp/phpcompiletest.$$
 
