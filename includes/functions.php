@@ -7144,6 +7144,78 @@ function mcp_validate_rrule ( $rrule ) {
 }
 
 /**
+ * Convert a GMT date/time to an absolute minute count, for interval math in
+ * the availability/conflict tools. Uses gmmktime so the value is timezone-
+ * and DST-independent (both sides of a comparison use the same GMT frame).
+ *
+ * @param string|int $date YYYYMMDD
+ * @param string|int $time HHMMSS (unpadded integers like 80000 are accepted)
+ * @return int Whole minutes since the Unix epoch (GMT).
+ */
+function mcp_datetime_to_min ( $date, $time ) {
+  $d = sprintf ( '%08d', (int)$date );
+  $t = sprintf ( '%06d', (int)$time );
+  $ts = gmmktime (
+    (int)substr ( $t, 0, 2 ), (int)substr ( $t, 2, 2 ), (int)substr ( $t, 4, 2 ),
+    (int)substr ( $d, 4, 2 ), (int)substr ( $d, 6, 2 ), (int)substr ( $d, 0, 4 ) );
+  return intdiv ( $ts, 60 );
+}
+
+/**
+ * Whether two half-open intervals [s1,e1) and [s2,e2) overlap. Touching
+ * endpoints (e.g. back-to-back meetings) do NOT count as an overlap.
+ *
+ * @return bool
+ */
+function mcp_intervals_overlap ( $s1, $e1, $s2, $e2 ) {
+  return $s1 < $e2 && $s2 < $e1;
+}
+
+/**
+ * Return the subset of $events that overlaps the proposed [start,end) interval.
+ *
+ * @param int   $start  Proposed start (minutes).
+ * @param int   $end    Proposed end (minutes).
+ * @param array $events Each ['id','name','start','end'] with minute values.
+ * @return array The overlapping events, in input order.
+ */
+function mcp_find_conflicts ( $start, $end, array $events ) {
+  $conflicts = [];
+  foreach ( $events as $e ) {
+    if ( mcp_intervals_overlap ( $start, $end, $e['start'], $e['end'] ) )
+      $conflicts[] = $e;
+  }
+  return $conflicts;
+}
+
+/**
+ * Merge a list of [start,end] intervals into sorted, non-overlapping busy
+ * blocks. Touching intervals are left separate (back-to-back busy blocks).
+ *
+ * @param array $intervals List of [start,end] pairs (minutes).
+ * @return array Sorted, merged list of [start,end] pairs.
+ */
+function mcp_merge_intervals ( array $intervals ) {
+  if ( empty ( $intervals ) )
+    return [];
+  usort ( $intervals, function ( $a, $b ) { return $a[0] <=> $b[0]; } );
+  $merged = [ $intervals[0] ];
+  $count = count ( $intervals );
+  for ( $i = 1; $i < $count; $i++ ) {
+    $last = &$merged[count ( $merged ) - 1];
+    // Merge only on real overlap; equal endpoints stay separate.
+    if ( $intervals[$i][0] < $last[1] ) {
+      if ( $intervals[$i][1] > $last[1] )
+        $last[1] = $intervals[$i][1];
+    } else {
+      $merged[] = $intervals[$i];
+    }
+    unset ( $last );
+  }
+  return $merged;
+}
+
+/**
  * Dispatch a decoded JSON-RPC request to the appropriate MCP method and build
  * the JSON-RPC response array. This is the pure routing core extracted from
  * handleMcpHttpRequest() so it can be exercised without HTTP/STDIO transport.
