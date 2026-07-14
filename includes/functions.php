@@ -7012,6 +7012,138 @@ function mcp_shift_date ( $date, $days ) {
 }
 
 /**
+ * Validate a client-supplied RRULE against the subset WebCalendar can store
+ * and correctly expand (see the scheduling-agent schema audit,
+ * docs/SCHEMA_AUDIT.md).
+ *
+ * Server-side, defense-in-depth validation for add_recurring_event -- the MCP
+ * server must never trust its client. Pure function (no DB, no globals) so it
+ * is unit-tested directly.
+ *
+ * Supported: FREQ in {DAILY,WEEKLY,MONTHLY,YEARLY}; INTERVAL, COUNT, UNTIL
+ * (COUNT/UNTIL mutually exclusive), BYMONTH, BYMONTHDAY, BYDAY (with numeric
+ * offsets), BYSETPOS, BYWEEKNO, BYYEARDAY, WKST. Rejected: sub-daily FREQ,
+ * BYHOUR/BYMINUTE/BYSECOND (WebCalendar ignores them), the COUNT=999 infinite
+ * sentinel, malformed values, unknown or duplicate parts, and BY* values that
+ * would overflow the webcal_entry_repeats varchar columns.
+ *
+ * @param string $rrule An RRULE string, with or without a leading "RRULE:".
+ * @return array ['valid'=>true,'parts'=>[KEY=>VALUE,...]] (normalized), or
+ *               ['valid'=>false,'error'=>string].
+ */
+function mcp_validate_rrule ( $rrule ) {
+  $fail = function ( $msg ) { return [ 'valid' => false, 'error' => $msg ]; };
+
+  // Strip an optional leading "RRULE:" (case-insensitive) and surrounding space.
+  $s = trim ( preg_replace ( '/^RRULE:/i', '', trim ( (string)$rrule ) ) );
+  if ( $s === '' )
+    return $fail ( 'RRULE is required' );
+
+  // Column width bounds from webcal_entry_repeats (schema audit).
+  $WIDTH = [ 'BYMONTH' => 50, 'BYMONTHDAY' => 100, 'BYDAY' => 100,
+    'BYSETPOS' => 50, 'BYWEEKNO' => 50, 'BYYEARDAY' => 50, 'WKST' => 2 ];
+  $WEEKDAYS = [ 'SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA' ];
+  $KNOWN = [ 'FREQ', 'INTERVAL', 'COUNT', 'UNTIL', 'BYMONTH', 'BYMONTHDAY',
+    'BYDAY', 'BYSETPOS', 'BYWEEKNO', 'BYYEARDAY', 'WKST' ];
+  $UNSUPPORTED = [ 'BYHOUR', 'BYMINUTE', 'BYSECOND' ];
+
+  // Parse KEY=VALUE parts, rejecting malformed/duplicate/unknown ones.
+  $parts = [];
+  foreach ( explode ( ';', $s ) as $token ) {
+    if ( $token === '' )
+      continue;
+    $eq = strpos ( $token, '=' );
+    if ( $eq === false )
+      return $fail ( "Malformed RRULE part: $token" );
+    $key = strtoupper ( trim ( substr ( $token, 0, $eq ) ) );
+    $val = trim ( substr ( $token, $eq + 1 ) );
+    if ( isset ( $parts[$key] ) )
+      return $fail ( "Duplicate RRULE part: $key" );
+    if ( in_array ( $key, $UNSUPPORTED, true ) )
+      return $fail ( "Unsupported RRULE part: $key (WebCalendar cannot expand it)" );
+    if ( ! in_array ( $key, $KNOWN, true ) )
+      return $fail ( "Unknown RRULE part: $key" );
+    $parts[$key] = $val;
+  }
+
+  // FREQ is required and limited to the four WebCalendar can expand.
+  if ( ! isset ( $parts['FREQ'] ) )
+    return $fail ( 'RRULE must include FREQ' );
+  $parts['FREQ'] = strtoupper ( $parts['FREQ'] );
+  if ( ! in_array ( $parts['FREQ'], [ 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY' ], true ) )
+    return $fail ( "Unsupported FREQ: {$parts['FREQ']} (allowed: DAILY, WEEKLY, MONTHLY, YEARLY)" );
+
+  // COUNT and UNTIL are mutually exclusive (RFC 5545).
+  if ( isset ( $parts['COUNT'] ) && isset ( $parts['UNTIL'] ) )
+    return $fail ( 'RRULE may not set both COUNT and UNTIL' );
+
+  // INTERVAL: positive integer.
+  if ( isset ( $parts['INTERVAL'] ) &&
+       ( ! ctype_digit ( $parts['INTERVAL'] ) || (int)$parts['INTERVAL'] < 1 ) )
+    return $fail ( 'INTERVAL must be a positive integer' );
+
+  // COUNT: positive integer, and not the 999 infinite sentinel.
+  if ( isset ( $parts['COUNT'] ) ) {
+    if ( ! ctype_digit ( $parts['COUNT'] ) || (int)$parts['COUNT'] < 1 )
+      return $fail ( 'COUNT must be a positive integer' );
+    if ( (int)$parts['COUNT'] === 999 )
+      return $fail ( 'COUNT=999 is reserved by WebCalendar as the infinite sentinel' );
+  }
+
+  // UNTIL: date (YYYYMMDD) or datetime (YYYYMMDDTHHMMSS[Z]).
+  if ( isset ( $parts['UNTIL'] ) &&
+       ! preg_match ( '/^\d{8}(T\d{6}Z?)?$/', $parts['UNTIL'] ) )
+    return $fail ( 'UNTIL must be YYYYMMDD or YYYYMMDDTHHMMSSZ' );
+
+  // WKST: a weekday abbreviation.
+  if ( isset ( $parts['WKST'] ) ) {
+    $parts['WKST'] = strtoupper ( $parts['WKST'] );
+    if ( ! in_array ( $parts['WKST'], $WEEKDAYS, true ) )
+      return $fail ( 'WKST must be one of SU,MO,TU,WE,TH,FR,SA' );
+  }
+
+  // BYDAY: comma list of [+/-n]WD tokens (offset 1..53 optional).
+  if ( isset ( $parts['BYDAY'] ) ) {
+    $parts['BYDAY'] = strtoupper ( $parts['BYDAY'] );
+    foreach ( explode ( ',', $parts['BYDAY'] ) as $tok ) {
+      if ( ! preg_match (
+        '/^([+-]?([1-9]|[1-4][0-9]|5[0-3]))?(SU|MO|TU|WE|TH|FR|SA)$/', $tok ) )
+        return $fail ( "Invalid BYDAY value: $tok" );
+    }
+  }
+
+  // Integer-list BY* parts with range checks (nonzero; magnitude in [min,max]).
+  foreach ( [
+    [ 'BYMONTH', 1, 12, false ], [ 'BYMONTHDAY', 1, 31, true ],
+    [ 'BYSETPOS', 1, 366, true ], [ 'BYWEEKNO', 1, 53, true ],
+    [ 'BYYEARDAY', 1, 366, true ],
+  ] as [ $name, $min, $max, $allowNeg ] ) {
+    if ( ! isset ( $parts[$name] ) )
+      continue;
+    foreach ( explode ( ',', $parts[$name] ) as $v ) {
+      if ( ! preg_match ( '/^-?\d+$/', $v ) )
+        return $fail ( "Invalid $name value: $v" );
+      $n = (int)$v;
+      if ( $n === 0 )
+        return $fail ( "$name value may not be zero" );
+      if ( ! $allowNeg && $n < 0 )
+        return $fail ( "$name value may not be negative: $v" );
+      $mag = abs ( $n );
+      if ( $mag < $min || $mag > $max )
+        return $fail ( "$name value out of range: $v" );
+    }
+  }
+
+  // Reject values that would overflow the varchar columns.
+  foreach ( $WIDTH as $name => $max ) {
+    if ( isset ( $parts[$name] ) && strlen ( $parts[$name] ) > $max )
+      return $fail ( "$name exceeds the $max-character column limit" );
+  }
+
+  return [ 'valid' => true, 'parts' => $parts ];
+}
+
+/**
  * Dispatch a decoded JSON-RPC request to the appropriate MCP method and build
  * the JSON-RPC response array. This is the pure routing core extracted from
  * handleMcpHttpRequest() so it can be exercised without HTTP/STDIO transport.
