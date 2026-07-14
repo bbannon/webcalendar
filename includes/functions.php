@@ -6965,6 +6965,50 @@ function mcp_list_tools() {
         ],
         'required' => ['date', 'time', 'duration']
       ]
+    ],
+    [
+      'name' => 'add_recurring_event',
+      'description' => 'Add a recurring event described by an RFC 5545 RRULE. '
+        . 'The RRULE must use the WebCalendar-supported subset (FREQ '
+        . 'DAILY/WEEKLY/MONTHLY/YEARLY; INTERVAL, COUNT, UNTIL, BYMONTH, '
+        . 'BYMONTHDAY, BYDAY, BYSETPOS, BYWEEKNO, BYYEARDAY, WKST). '
+        . 'Date/time are GMT; write access must be enabled.',
+      'inputSchema' => [
+        'type' => 'object',
+        'properties' => [
+          'name' => [
+            'type' => 'string',
+            'description' => 'Event name'
+          ],
+          'date' => [
+            'type' => 'string',
+            'description' => 'Date of the first occurrence in YYYYMMDD format (GMT)'
+          ],
+          'rrule' => [
+            'type' => 'string',
+            'description' => 'RFC 5545 RRULE, e.g. FREQ=WEEKLY;BYDAY=MO,WE,FR'
+          ],
+          'time' => [
+            'type' => 'string',
+            'description' => 'Start time in HHMMSS format (GMT), or -1 for untimed',
+            'default' => '-1'
+          ],
+          'duration' => [
+            'type' => 'integer',
+            'description' => 'Duration in minutes',
+            'default' => 0
+          ],
+          'description' => [
+            'type' => 'string',
+            'description' => 'Event description'
+          ],
+          'location' => [
+            'type' => 'string',
+            'description' => 'Event location'
+          ]
+        ],
+        'required' => ['name', 'date', 'rrule']
+      ]
     ]
   ];
 }
@@ -7189,6 +7233,56 @@ function mcp_validate_rrule ( $rrule ) {
 }
 
 /**
+ * Map validated RRULE parts to webcal_entry_repeats column values, matching
+ * how xcal.php stores recurrence (see the scheduling-agent schema audit).
+ *
+ * cal_type follows WebCalendar's derivation: DAILY/WEEKLY/YEARLY map directly;
+ * MONTHLY is 'monthlyBySetPos' when BYSETPOS is present, else 'monthlyByDay'.
+ * UNTIL is interpreted in the GMT storage frame (consistent with the other
+ * scheduling tools) -- its date and time-of-day components are stored directly
+ * with no timezone shift. Pure function.
+ *
+ * @param array $parts Normalized parts from mcp_validate_rrule().
+ * @return array Column => value pairs for webcal_entry_repeats (only the
+ *               columns implied by the rule; always cal_type/cal_frequency/
+ *               cal_wkst).
+ */
+function mcp_rrule_to_repeat_columns ( array $parts ) {
+  $cols = [];
+  switch ( $parts['FREQ'] ) {
+    case 'DAILY':  $cols['cal_type'] = 'daily'; break;
+    case 'WEEKLY': $cols['cal_type'] = 'weekly'; break;
+    case 'YEARLY': $cols['cal_type'] = 'yearly'; break;
+    case 'MONTHLY':
+      $cols['cal_type'] = isset ( $parts['BYSETPOS'] )
+        ? 'monthlyBySetPos' : 'monthlyByDay';
+      break;
+  }
+  $cols['cal_frequency'] = isset ( $parts['INTERVAL'] ) ? (int)$parts['INTERVAL'] : 1;
+  $cols['cal_wkst'] = $parts['WKST'] ?? 'MO';
+
+  foreach ( [
+    'BYMONTH' => 'cal_bymonth', 'BYMONTHDAY' => 'cal_bymonthday',
+    'BYDAY' => 'cal_byday', 'BYSETPOS' => 'cal_bysetpos',
+    'BYWEEKNO' => 'cal_byweekno', 'BYYEARDAY' => 'cal_byyearday',
+  ] as $part => $col ) {
+    if ( isset ( $parts[$part] ) )
+      $cols[$col] = $parts[$part];
+  }
+
+  if ( isset ( $parts['COUNT'] ) )
+    $cols['cal_count'] = (int)$parts['COUNT'];
+
+  if ( isset ( $parts['UNTIL'] ) &&
+       preg_match ( '/^(\d{8})(T(\d{6})Z?)?$/', $parts['UNTIL'], $m ) ) {
+    $cols['cal_end'] = (int)$m[1];
+    $cols['cal_endtime'] = isset ( $m[3] ) ? (int)$m[3] : 0;
+  }
+
+  return $cols;
+}
+
+/**
  * Convert a GMT date/time to an absolute minute count, for interval math in
  * the availability/conflict tools. Uses gmmktime so the value is timezone-
  * and DST-independent (both sides of a comparison use the same GMT frame).
@@ -7329,6 +7423,17 @@ function mcp_dispatch_request($request, $tools = null) {
               $tool_args['date'] ?? '',
               $tool_args['time'] ?? '',
               $tool_args['duration'] ?? 0
+            );
+            break;
+          case 'add_recurring_event':
+            $result = $tools->add_recurring_event(
+              $tool_args['name'] ?? '',
+              $tool_args['date'] ?? '',
+              $tool_args['rrule'] ?? '',
+              $tool_args['time'] ?? '-1',
+              $tool_args['duration'] ?? 0,
+              $tool_args['description'] ?? '',
+              $tool_args['location'] ?? ''
             );
             break;
           default:

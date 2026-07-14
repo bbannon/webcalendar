@@ -637,6 +637,104 @@ class WebCalendarMcpTools
 
         return ['has_conflict' => !empty($conflicts), 'conflicts' => $conflicts];
     }
+
+    #[McpTool(description: 'Add a recurring event described by an RFC 5545 RRULE')]
+    public function add_recurring_event(
+        string $name,
+        string $date,
+        string $rrule,
+        string $time = '-1',
+        int $duration = 0,
+        string $description = '',
+        string $location = ''
+    ): array {
+        if (!is_mcp_write_enabled()) {
+            return ['error' => 'MCP write access is not enabled'];
+        }
+        if (empty($name)) {
+            return ['error' => 'Event name is required'];
+        }
+        if (!preg_match('/^\d{8}$/', $date)) {
+            return ['error' => 'Date must be in YYYYMMDD format'];
+        }
+
+        // Time: -1 (untimed) or HHMMSS in the GMT frame.
+        $cal_time = -1;
+        if ((string)$time !== '' && (string)$time !== '-1') {
+            if (!preg_match('/^\d{1,6}$/', (string)$time)) {
+                return ['error' => 'Time must be in HHMMSS format or -1 for untimed'];
+            }
+            $cal_time = (int)$time;
+        }
+
+        // Validate the RRULE against the WebCalendar-supported subset and map
+        // it to webcal_entry_repeats columns (defense in depth: never trust
+        // the client, even though the agent validates too).
+        $validated = mcp_validate_rrule($rrule);
+        if (!$validated['valid']) {
+            return ['error' => 'Invalid RRULE: ' . $validated['error']];
+        }
+        $repeat_cols = mcp_rrule_to_repeat_columns($validated['parts']);
+
+        // Insert the base event, assigning cal_id as MAX(cal_id)+1 with a
+        // retry-on-collision loop (same pattern/rationale as add_event).
+        $now = date('Ymd');
+        $mod_time = date('His');
+        $sql = "INSERT INTO webcal_entry (cal_id, cal_name, cal_date, cal_time, cal_duration, cal_description, cal_location, cal_create_by, cal_mod_date, cal_mod_time)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $event_id = null;
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $res = dbi_execute('SELECT MAX(cal_id) FROM webcal_entry');
+            if (!$res) {
+                return ['error' => 'Failed to create event'];
+            }
+            $row = dbi_fetch_row($res);
+            $candidate_id = ($row[0] ?? 0) + 1;
+            dbi_free_result($res);
+
+            $res = dbi_execute(
+                $sql,
+                [$candidate_id, $name, $date, $cal_time, $duration, $description, $location, $this->userLogin, $now, $mod_time],
+                false,
+                false
+            );
+            if ($res) {
+                $event_id = $candidate_id;
+                break;
+            }
+        }
+        if ($event_id === null) {
+            return ['error' => 'Failed to create event'];
+        }
+
+        // Participation row.
+        dbi_execute(
+            "INSERT INTO webcal_entry_user (cal_id, cal_login, cal_status) VALUES (?, ?, 'A')",
+            [$event_id, $this->userLogin]
+        );
+
+        // Insert the recurrence row. If it fails, roll back the base event so
+        // we never leave an orphan non-repeating entry behind.
+        $repeat_cols = array_merge(['cal_id' => $event_id], $repeat_cols);
+        $cols = array_keys($repeat_cols);
+        $placeholders = implode(', ', array_fill(0, count($cols), '?'));
+        $rsql = 'INSERT INTO webcal_entry_repeats (' . implode(', ', $cols)
+            . ') VALUES (' . $placeholders . ')';
+        $rres = dbi_execute($rsql, array_values($repeat_cols));
+        if (!$rres) {
+            dbi_execute('DELETE FROM webcal_entry_user WHERE cal_id = ?', [$event_id]);
+            dbi_execute('DELETE FROM webcal_entry WHERE cal_id = ?', [$event_id]);
+            return ['error' => 'Failed to store recurrence rule'];
+        }
+
+        activity_log($event_id, $this->userLogin, $this->userLogin, 'M', 'MCP: Recurring event created');
+
+        return [
+            'success' => true,
+            'event_id' => $event_id,
+            'cal_type' => $repeat_cols['cal_type']
+        ];
+    }
 }
 
 // Handle transport based on execution context

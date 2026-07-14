@@ -24,6 +24,11 @@ final class McpToolDispatchTest extends TestCase
         $this->calls[] = ['check_conflicts', [$date, $time, $duration]];
         return ['has_conflict' => false, 'conflicts' => []];
       }
+      public function add_recurring_event($name, $date, $rrule, $time, $duration, $description, $location) {
+        $this->calls[] = ['add_recurring_event',
+          [$name, $date, $rrule, $time, $duration, $description, $location]];
+        return ['success' => true, 'event_id' => 42, 'cal_type' => 'weekly'];
+      }
     };
   }
 
@@ -73,5 +78,28 @@ final class McpToolDispatchTest extends TestCase
     $this->assertSame(['check_conflicts', ['20260611', '090000', 60]], $tools->calls[0]);
     $this->assertArrayHasKey('result', $resp);
     $this->assertFalse($resp['result']['has_conflict']);
+  }
+
+  public function test_add_recurring_event_schema_required_fields() {
+    $schema = get_mcp_tool_schema('add_recurring_event');
+    $this->assertNotNull($schema);
+    $this->assertContains('name', $schema['required']);
+    $this->assertContains('date', $schema['required']);
+    $this->assertContains('rrule', $schema['required']);
+  }
+
+  public function test_dispatch_routes_add_recurring_event_with_args() {
+    $tools = $this->stubTools();
+    $resp = $this->call($tools, 'add_recurring_event', [
+      'name' => 'Standup', 'date' => '20260803', 'rrule' => 'FREQ=WEEKLY;BYDAY=MO',
+      'time' => '091500', 'duration' => 15, 'description' => 'daily sync', 'location' => 'Zoom',
+    ]);
+
+    $this->assertSame(
+      ['add_recurring_event',
+        ['Standup', '20260803', 'FREQ=WEEKLY;BYDAY=MO', '091500', 15, 'daily sync', 'Zoom']],
+      $tools->calls[0]
+    );
+    $this->assertSame(42, $resp['result']['event_id']);
   }
 }
