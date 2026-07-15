@@ -282,4 +282,68 @@ final class McpSchedulingWriteToolsIntegrationTest extends TestCase
         $row = $this->entryRow((int)$result['event_id']);
         $this->assertEquals(-1, $row['cal_time'], 'no time given -> untimed (-1)');
     }
+
+    /**
+     * Soft-delete an event the way the web UI does: set its per-user status to
+     * 'D' rather than removing the row (see includes/xcal.php delete flow).
+     */
+    private function softDelete(int $calId): void
+    {
+        $db = new SQLite3(self::$db_file);
+        $stmt = $db->prepare('UPDATE webcal_entry_user SET cal_status = :s WHERE cal_id = :id');
+        $stmt->bindValue(':s', 'D', SQLITE3_TEXT);
+        $stmt->bindValue(':id', $calId, SQLITE3_INTEGER);
+        $stmt->execute();
+        $db->close();
+    }
+
+    public function test_read_tools_exclude_ui_deleted_events(): void
+    {
+        // A uniquely named, timed event that lands in every read tool's window.
+        $unique = 'SoftDeleteMe_' . bin2hex(random_bytes(4));
+        $add = $this->callTool('add_event', [
+            'name' => $unique,
+            'date' => '20260720',
+            'time' => '150000',
+            'duration' => 60,
+        ]);
+        $id = (int)($add['result']['event_id'] ?? 0);
+        $this->assertGreaterThan(0, $id, 'setup add_event failed: ' . json_encode($add));
+
+        // Before deletion: search_events finds it (sanity check the fixture).
+        $before = $this->callTool('search_events', ['keyword' => $unique]);
+        $names = array_column($before['result']['events'] ?? [], 'name');
+        $this->assertContains($unique, $names, 'event should be visible before deletion');
+
+        // Soft-delete as the UI does, then every read tool must exclude it.
+        $this->softDelete($id);
+
+        $search = $this->callTool('search_events', ['keyword' => $unique]);
+        $this->assertNotContains(
+            $unique,
+            array_column($search['result']['events'] ?? [], 'name'),
+            'search_events must not return a deleted event'
+        );
+
+        $list = $this->callTool('list_events', ['start_date' => '20260720', 'end_date' => '20260720']);
+        $this->assertNotContains(
+            $id,
+            array_column($list['result']['events'] ?? [], 'id'),
+            'list_events must not return a deleted event'
+        );
+
+        $avail = $this->callTool('get_availability', ['start_date' => '20260720', 'end_date' => '20260720']);
+        $this->assertNotContains(
+            $id,
+            array_column($avail['result']['busy'] ?? [], 'id'),
+            'get_availability must not report a deleted event as busy'
+        );
+
+        $conf = $this->callTool('check_conflicts', ['date' => '20260720', 'time' => '150000', 'duration' => 60]);
+        $this->assertNotContains(
+            $id,
+            array_column($conf['result']['conflicts'] ?? [], 'id'),
+            'check_conflicts must not flag a deleted event'
+        );
+    }
 }
