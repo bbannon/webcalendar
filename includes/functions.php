@@ -6920,6 +6920,141 @@ function mcp_list_tools() {
         ],
         'required' => ['name', 'date']
       ]
+    ],
+    [
+      'name' => 'get_availability',
+      'description' => 'List the authenticated user\'s busy time blocks within a '
+        . 'date range, for scheduling. Times are GMT (the storage frame); the '
+        . 'caller converts to local as needed. Recurring-event occurrences '
+        . 'beyond their base date are not yet expanded.',
+      'inputSchema' => [
+        'type' => 'object',
+        'properties' => [
+          'start_date' => [
+            'type' => 'string',
+            'description' => 'Start date in YYYYMMDD format'
+          ],
+          'end_date' => [
+            'type' => 'string',
+            'description' => 'End date in YYYYMMDD format'
+          ]
+        ],
+        'required' => ['start_date', 'end_date']
+      ]
+    ],
+    [
+      'name' => 'check_conflicts',
+      'description' => 'Check whether a proposed time slot overlaps any of the '
+        . 'authenticated user\'s existing timed events. Date/time are GMT.',
+      'inputSchema' => [
+        'type' => 'object',
+        'properties' => [
+          'date' => [
+            'type' => 'string',
+            'description' => 'Proposed date in YYYYMMDD format (GMT)'
+          ],
+          'time' => [
+            'type' => 'string',
+            'description' => 'Proposed start time in HHMMSS format (GMT)'
+          ],
+          'duration' => [
+            'type' => 'integer',
+            'description' => 'Proposed duration in minutes',
+            'default' => 0
+          ]
+        ],
+        'required' => ['date', 'time', 'duration']
+      ]
+    ],
+    [
+      'name' => 'add_recurring_event',
+      'description' => 'Add a recurring event described by an RFC 5545 RRULE. '
+        . 'The RRULE must use the WebCalendar-supported subset (FREQ '
+        . 'DAILY/WEEKLY/MONTHLY/YEARLY; INTERVAL, COUNT, UNTIL, BYMONTH, '
+        . 'BYMONTHDAY, BYDAY, BYSETPOS, BYWEEKNO, BYYEARDAY, WKST). '
+        . 'Date/time are GMT; write access must be enabled.',
+      'inputSchema' => [
+        'type' => 'object',
+        'properties' => [
+          'name' => [
+            'type' => 'string',
+            'description' => 'Event name'
+          ],
+          'date' => [
+            'type' => 'string',
+            'description' => 'Date of the first occurrence in YYYYMMDD format (GMT)'
+          ],
+          'rrule' => [
+            'type' => 'string',
+            'description' => 'RFC 5545 RRULE, e.g. FREQ=WEEKLY;BYDAY=MO,WE,FR'
+          ],
+          'time' => [
+            'type' => 'string',
+            'description' => 'Start time in HHMMSS format (GMT), or -1 for untimed',
+            'default' => '-1'
+          ],
+          'duration' => [
+            'type' => 'integer',
+            'description' => 'Duration in minutes',
+            'default' => 0
+          ],
+          'description' => [
+            'type' => 'string',
+            'description' => 'Event description'
+          ],
+          'location' => [
+            'type' => 'string',
+            'description' => 'Event location'
+          ]
+        ],
+        'required' => ['name', 'date', 'rrule']
+      ]
+    ],
+    [
+      'name' => 'update_event',
+      'description' => 'Update fields of an event the authenticated user '
+        . 'created. Only the fields provided are changed. Date/time are GMT. '
+        . 'Write access must be enabled.',
+      'inputSchema' => [
+        'type' => 'object',
+        'properties' => [
+          'event_id' => [
+            'type' => 'integer',
+            'description' => 'The cal_id of the event to update'
+          ],
+          'name' => ['type' => 'string', 'description' => 'New event name'],
+          'date' => [
+            'type' => 'string',
+            'description' => 'New date in YYYYMMDD format (GMT)'
+          ],
+          'time' => [
+            'type' => 'string',
+            'description' => 'New start time in HHMMSS (GMT), or -1 for untimed'
+          ],
+          'duration' => [
+            'type' => 'integer',
+            'description' => 'New duration in minutes'
+          ],
+          'description' => ['type' => 'string', 'description' => 'New description'],
+          'location' => ['type' => 'string', 'description' => 'New location']
+        ],
+        'required' => ['event_id']
+      ]
+    ],
+    [
+      'name' => 'delete_event',
+      'description' => 'Delete an event the authenticated user created, '
+        . 'including any recurrence rows. Write access must be enabled.',
+      'inputSchema' => [
+        'type' => 'object',
+        'properties' => [
+          'event_id' => [
+            'type' => 'integer',
+            'description' => 'The cal_id of the event to delete'
+          ]
+        ],
+        'required' => ['event_id']
+      ]
     ]
   ];
 }
@@ -7012,6 +7147,260 @@ function mcp_shift_date ( $date, $days ) {
 }
 
 /**
+ * Validate a client-supplied RRULE against the subset WebCalendar can store
+ * and correctly expand (see the scheduling-agent schema audit,
+ * docs/SCHEMA_AUDIT.md).
+ *
+ * Server-side, defense-in-depth validation for add_recurring_event -- the MCP
+ * server must never trust its client. Pure function (no DB, no globals) so it
+ * is unit-tested directly.
+ *
+ * Supported: FREQ in {DAILY,WEEKLY,MONTHLY,YEARLY}; INTERVAL, COUNT, UNTIL
+ * (COUNT/UNTIL mutually exclusive), BYMONTH, BYMONTHDAY, BYDAY (with numeric
+ * offsets), BYSETPOS, BYWEEKNO, BYYEARDAY, WKST. Rejected: sub-daily FREQ,
+ * BYHOUR/BYMINUTE/BYSECOND (WebCalendar ignores them), the COUNT=999 infinite
+ * sentinel, malformed values, unknown or duplicate parts, and BY* values that
+ * would overflow the webcal_entry_repeats varchar columns.
+ *
+ * @param string $rrule An RRULE string, with or without a leading "RRULE:".
+ * @return array ['valid'=>true,'parts'=>[KEY=>VALUE,...]] (normalized), or
+ *               ['valid'=>false,'error'=>string].
+ */
+function mcp_validate_rrule ( $rrule ) {
+  $fail = function ( $msg ) { return [ 'valid' => false, 'error' => $msg ]; };
+
+  // Strip an optional leading "RRULE:" (case-insensitive) and surrounding space.
+  $s = trim ( preg_replace ( '/^RRULE:/i', '', trim ( (string)$rrule ) ) );
+  if ( $s === '' )
+    return $fail ( 'RRULE is required' );
+
+  // Column width bounds from webcal_entry_repeats (schema audit).
+  $WIDTH = [ 'BYMONTH' => 50, 'BYMONTHDAY' => 100, 'BYDAY' => 100,
+    'BYSETPOS' => 50, 'BYWEEKNO' => 50, 'BYYEARDAY' => 50, 'WKST' => 2 ];
+  $WEEKDAYS = [ 'SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA' ];
+  $KNOWN = [ 'FREQ', 'INTERVAL', 'COUNT', 'UNTIL', 'BYMONTH', 'BYMONTHDAY',
+    'BYDAY', 'BYSETPOS', 'BYWEEKNO', 'BYYEARDAY', 'WKST' ];
+  $UNSUPPORTED = [ 'BYHOUR', 'BYMINUTE', 'BYSECOND' ];
+
+  // Parse KEY=VALUE parts, rejecting malformed/duplicate/unknown ones.
+  $parts = [];
+  foreach ( explode ( ';', $s ) as $token ) {
+    if ( $token === '' )
+      continue;
+    $eq = strpos ( $token, '=' );
+    if ( $eq === false )
+      return $fail ( "Malformed RRULE part: $token" );
+    $key = strtoupper ( trim ( substr ( $token, 0, $eq ) ) );
+    $val = trim ( substr ( $token, $eq + 1 ) );
+    if ( isset ( $parts[$key] ) )
+      return $fail ( "Duplicate RRULE part: $key" );
+    if ( in_array ( $key, $UNSUPPORTED, true ) )
+      return $fail ( "Unsupported RRULE part: $key (WebCalendar cannot expand it)" );
+    if ( ! in_array ( $key, $KNOWN, true ) )
+      return $fail ( "Unknown RRULE part: $key" );
+    $parts[$key] = $val;
+  }
+
+  // FREQ is required and limited to the four WebCalendar can expand.
+  if ( ! isset ( $parts['FREQ'] ) )
+    return $fail ( 'RRULE must include FREQ' );
+  $parts['FREQ'] = strtoupper ( $parts['FREQ'] );
+  if ( ! in_array ( $parts['FREQ'], [ 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY' ], true ) )
+    return $fail ( "Unsupported FREQ: {$parts['FREQ']} (allowed: DAILY, WEEKLY, MONTHLY, YEARLY)" );
+
+  // COUNT and UNTIL are mutually exclusive (RFC 5545).
+  if ( isset ( $parts['COUNT'] ) && isset ( $parts['UNTIL'] ) )
+    return $fail ( 'RRULE may not set both COUNT and UNTIL' );
+
+  // INTERVAL: positive integer.
+  if ( isset ( $parts['INTERVAL'] ) &&
+       ( ! ctype_digit ( $parts['INTERVAL'] ) || (int)$parts['INTERVAL'] < 1 ) )
+    return $fail ( 'INTERVAL must be a positive integer' );
+
+  // COUNT: positive integer, and not the 999 infinite sentinel.
+  if ( isset ( $parts['COUNT'] ) ) {
+    if ( ! ctype_digit ( $parts['COUNT'] ) || (int)$parts['COUNT'] < 1 )
+      return $fail ( 'COUNT must be a positive integer' );
+    if ( (int)$parts['COUNT'] === 999 )
+      return $fail ( 'COUNT=999 is reserved by WebCalendar as the infinite sentinel' );
+  }
+
+  // UNTIL: date (YYYYMMDD) or datetime (YYYYMMDDTHHMMSS[Z]).
+  if ( isset ( $parts['UNTIL'] ) &&
+       ! preg_match ( '/^\d{8}(T\d{6}Z?)?$/', $parts['UNTIL'] ) )
+    return $fail ( 'UNTIL must be YYYYMMDD or YYYYMMDDTHHMMSSZ' );
+
+  // WKST: a weekday abbreviation.
+  if ( isset ( $parts['WKST'] ) ) {
+    $parts['WKST'] = strtoupper ( $parts['WKST'] );
+    if ( ! in_array ( $parts['WKST'], $WEEKDAYS, true ) )
+      return $fail ( 'WKST must be one of SU,MO,TU,WE,TH,FR,SA' );
+  }
+
+  // BYDAY: comma list of [+/-n]WD tokens (offset 1..53 optional).
+  if ( isset ( $parts['BYDAY'] ) ) {
+    $parts['BYDAY'] = strtoupper ( $parts['BYDAY'] );
+    foreach ( explode ( ',', $parts['BYDAY'] ) as $tok ) {
+      if ( ! preg_match (
+        '/^([+-]?([1-9]|[1-4][0-9]|5[0-3]))?(SU|MO|TU|WE|TH|FR|SA)$/', $tok ) )
+        return $fail ( "Invalid BYDAY value: $tok" );
+    }
+  }
+
+  // Integer-list BY* parts with range checks (nonzero; magnitude in [min,max]).
+  foreach ( [
+    [ 'BYMONTH', 1, 12, false ], [ 'BYMONTHDAY', 1, 31, true ],
+    [ 'BYSETPOS', 1, 366, true ], [ 'BYWEEKNO', 1, 53, true ],
+    [ 'BYYEARDAY', 1, 366, true ],
+  ] as [ $name, $min, $max, $allowNeg ] ) {
+    if ( ! isset ( $parts[$name] ) )
+      continue;
+    foreach ( explode ( ',', $parts[$name] ) as $v ) {
+      if ( ! preg_match ( '/^-?\d+$/', $v ) )
+        return $fail ( "Invalid $name value: $v" );
+      $n = (int)$v;
+      if ( $n === 0 )
+        return $fail ( "$name value may not be zero" );
+      if ( ! $allowNeg && $n < 0 )
+        return $fail ( "$name value may not be negative: $v" );
+      $mag = abs ( $n );
+      if ( $mag < $min || $mag > $max )
+        return $fail ( "$name value out of range: $v" );
+    }
+  }
+
+  // Reject values that would overflow the varchar columns.
+  foreach ( $WIDTH as $name => $max ) {
+    if ( isset ( $parts[$name] ) && strlen ( $parts[$name] ) > $max )
+      return $fail ( "$name exceeds the $max-character column limit" );
+  }
+
+  return [ 'valid' => true, 'parts' => $parts ];
+}
+
+/**
+ * Map validated RRULE parts to webcal_entry_repeats column values, matching
+ * how xcal.php stores recurrence (see the scheduling-agent schema audit).
+ *
+ * cal_type follows WebCalendar's derivation: DAILY/WEEKLY/YEARLY map directly;
+ * MONTHLY is 'monthlyBySetPos' when BYSETPOS is present, else 'monthlyByDay'.
+ * UNTIL is interpreted in the GMT storage frame (consistent with the other
+ * scheduling tools) -- its date and time-of-day components are stored directly
+ * with no timezone shift. Pure function.
+ *
+ * @param array $parts Normalized parts from mcp_validate_rrule().
+ * @return array Column => value pairs for webcal_entry_repeats (only the
+ *               columns implied by the rule; always cal_type/cal_frequency/
+ *               cal_wkst).
+ */
+function mcp_rrule_to_repeat_columns ( array $parts ) {
+  $cols = [];
+  switch ( $parts['FREQ'] ) {
+    case 'DAILY':  $cols['cal_type'] = 'daily'; break;
+    case 'WEEKLY': $cols['cal_type'] = 'weekly'; break;
+    case 'YEARLY': $cols['cal_type'] = 'yearly'; break;
+    case 'MONTHLY':
+      $cols['cal_type'] = isset ( $parts['BYSETPOS'] )
+        ? 'monthlyBySetPos' : 'monthlyByDay';
+      break;
+  }
+  $cols['cal_frequency'] = isset ( $parts['INTERVAL'] ) ? (int)$parts['INTERVAL'] : 1;
+  $cols['cal_wkst'] = $parts['WKST'] ?? 'MO';
+
+  foreach ( [
+    'BYMONTH' => 'cal_bymonth', 'BYMONTHDAY' => 'cal_bymonthday',
+    'BYDAY' => 'cal_byday', 'BYSETPOS' => 'cal_bysetpos',
+    'BYWEEKNO' => 'cal_byweekno', 'BYYEARDAY' => 'cal_byyearday',
+  ] as $part => $col ) {
+    if ( isset ( $parts[$part] ) )
+      $cols[$col] = $parts[$part];
+  }
+
+  if ( isset ( $parts['COUNT'] ) )
+    $cols['cal_count'] = (int)$parts['COUNT'];
+
+  if ( isset ( $parts['UNTIL'] ) &&
+       preg_match ( '/^(\d{8})(T(\d{6})Z?)?$/', $parts['UNTIL'], $m ) ) {
+    $cols['cal_end'] = (int)$m[1];
+    $cols['cal_endtime'] = isset ( $m[3] ) ? (int)$m[3] : 0;
+  }
+
+  return $cols;
+}
+
+/**
+ * Convert a GMT date/time to an absolute minute count, for interval math in
+ * the availability/conflict tools. Uses gmmktime so the value is timezone-
+ * and DST-independent (both sides of a comparison use the same GMT frame).
+ *
+ * @param string|int $date YYYYMMDD
+ * @param string|int $time HHMMSS (unpadded integers like 80000 are accepted)
+ * @return int Whole minutes since the Unix epoch (GMT).
+ */
+function mcp_datetime_to_min ( $date, $time ) {
+  $d = sprintf ( '%08d', (int)$date );
+  $t = sprintf ( '%06d', (int)$time );
+  $ts = gmmktime (
+    (int)substr ( $t, 0, 2 ), (int)substr ( $t, 2, 2 ), (int)substr ( $t, 4, 2 ),
+    (int)substr ( $d, 4, 2 ), (int)substr ( $d, 6, 2 ), (int)substr ( $d, 0, 4 ) );
+  return intdiv ( $ts, 60 );
+}
+
+/**
+ * Whether two half-open intervals [s1,e1) and [s2,e2) overlap. Touching
+ * endpoints (e.g. back-to-back meetings) do NOT count as an overlap.
+ *
+ * @return bool
+ */
+function mcp_intervals_overlap ( $s1, $e1, $s2, $e2 ) {
+  return $s1 < $e2 && $s2 < $e1;
+}
+
+/**
+ * Return the subset of $events that overlaps the proposed [start,end) interval.
+ *
+ * @param int   $start  Proposed start (minutes).
+ * @param int   $end    Proposed end (minutes).
+ * @param array $events Each ['id','name','start','end'] with minute values.
+ * @return array The overlapping events, in input order.
+ */
+function mcp_find_conflicts ( $start, $end, array $events ) {
+  $conflicts = [];
+  foreach ( $events as $e ) {
+    if ( mcp_intervals_overlap ( $start, $end, $e['start'], $e['end'] ) )
+      $conflicts[] = $e;
+  }
+  return $conflicts;
+}
+
+/**
+ * Merge a list of [start,end] intervals into sorted, non-overlapping busy
+ * blocks. Touching intervals are left separate (back-to-back busy blocks).
+ *
+ * @param array $intervals List of [start,end] pairs (minutes).
+ * @return array Sorted, merged list of [start,end] pairs.
+ */
+function mcp_merge_intervals ( array $intervals ) {
+  if ( empty ( $intervals ) )
+    return [];
+  usort ( $intervals, function ( $a, $b ) { return $a[0] <=> $b[0]; } );
+  $merged = [ $intervals[0] ];
+  $count = count ( $intervals );
+  for ( $i = 1; $i < $count; $i++ ) {
+    $last = &$merged[count ( $merged ) - 1];
+    // Merge only on real overlap; equal endpoints stay separate.
+    if ( $intervals[$i][0] < $last[1] ) {
+      if ( $intervals[$i][1] > $last[1] )
+        $last[1] = $intervals[$i][1];
+    } else {
+      $merged[] = $intervals[$i];
+    }
+    unset ( $last );
+  }
+  return $merged;
+}
+
+/**
  * Dispatch a decoded JSON-RPC request to the appropriate MCP method and build
  * the JSON-RPC response array. This is the pure routing core extracted from
  * handleMcpHttpRequest() so it can be exercised without HTTP/STDIO transport.
@@ -7068,6 +7457,44 @@ function mcp_dispatch_request($request, $tools = null) {
               $tool_args['location'] ?? '',
               $tool_args['duration'] ?? 0
             );
+            break;
+          case 'get_availability':
+            $result = $tools->get_availability(
+              $tool_args['start_date'] ?? '',
+              $tool_args['end_date'] ?? ''
+            );
+            break;
+          case 'check_conflicts':
+            $result = $tools->check_conflicts(
+              $tool_args['date'] ?? '',
+              $tool_args['time'] ?? '',
+              $tool_args['duration'] ?? 0
+            );
+            break;
+          case 'add_recurring_event':
+            $result = $tools->add_recurring_event(
+              $tool_args['name'] ?? '',
+              $tool_args['date'] ?? '',
+              $tool_args['rrule'] ?? '',
+              $tool_args['time'] ?? '-1',
+              $tool_args['duration'] ?? 0,
+              $tool_args['description'] ?? '',
+              $tool_args['location'] ?? ''
+            );
+            break;
+          case 'update_event':
+            $result = $tools->update_event(
+              $tool_args['event_id'] ?? 0,
+              $tool_args['name'] ?? null,
+              $tool_args['date'] ?? null,
+              $tool_args['time'] ?? null,
+              $tool_args['duration'] ?? null,
+              $tool_args['description'] ?? null,
+              $tool_args['location'] ?? null
+            );
+            break;
+          case 'delete_event':
+            $result = $tools->delete_event($tool_args['event_id'] ?? 0);
             break;
           default:
             throw new Exception("Unknown tool: $tool_name");

@@ -331,13 +331,18 @@ final class McpIntegrationTest extends TestCase
         $this->assertMcpSuccess($response);
         
         $tools = $response['result']['tools'];
-        $this->assertCount(4, $tools, "Should have 4 tools");
-        
+        $this->assertCount(9, $tools, "Should have 9 tools");
+
         $tool_names = array_column($tools, 'name');
         $this->assertContains('list_events', $tool_names);
         $this->assertContains('get_user_info', $tool_names);
         $this->assertContains('search_events', $tool_names);
         $this->assertContains('add_event', $tool_names);
+        $this->assertContains('get_availability', $tool_names);
+        $this->assertContains('check_conflicts', $tool_names);
+        $this->assertContains('add_recurring_event', $tool_names);
+        $this->assertContains('update_event', $tool_names);
+        $this->assertContains('delete_event', $tool_names);
     }
 
     // ---------------------------------------------------------------

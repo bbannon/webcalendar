@@ -543,6 +543,326 @@ class WebCalendarMcpTools
 
         return ['success' => true, 'event_id' => $event_id];
     }
+
+    #[McpTool(description: 'List the user\'s busy time blocks in a date range (GMT)')]
+    public function get_availability(string $start_date, string $end_date): array
+    {
+        if (!preg_match('/^\d{8}$/', $start_date) || !preg_match('/^\d{8}$/', $end_date)) {
+            return ['error' => 'Dates must be in YYYYMMDD format'];
+        }
+
+        $sql = "SELECT e.cal_id, e.cal_name, e.cal_date, e.cal_time, e.cal_duration
+                FROM webcal_entry e
+                INNER JOIN webcal_entry_user eu ON e.cal_id = eu.cal_id
+                WHERE eu.cal_login = ? AND e.cal_date BETWEEN ? AND ?
+                ORDER BY e.cal_date, e.cal_time";
+
+        $busy = [];
+        $all_day = [];
+        $res = dbi_execute($sql, [$this->userLogin, $start_date, $end_date]);
+        if ($res) {
+            while ($row = dbi_fetch_row($res)) {
+                // Untimed/all-day events block the whole day; report separately.
+                if ((int)$row[3] === -1) {
+                    $all_day[] = ['id' => $row[0], 'name' => $row[1], 'date' => $row[2]];
+                    continue;
+                }
+                $busy[] = [
+                    'id' => $row[0],
+                    'name' => $row[1],
+                    'date' => $row[2],
+                    'time' => $row[3],
+                    'duration' => (int)$row[4]
+                ];
+            }
+            dbi_free_result($res);
+        }
+
+        // Times are GMT (storage frame); recurring occurrences beyond the base
+        // date are not yet expanded (documented limitation).
+        return ['busy' => $busy, 'all_day' => $all_day, 'timezone' => 'GMT'];
+    }
+
+    #[McpTool(description: 'Check whether a proposed slot overlaps existing timed events (GMT)')]
+    public function check_conflicts(string $date, string $time, int $duration): array
+    {
+        if (!preg_match('/^\d{8}$/', $date)) {
+            return ['error' => 'Date must be in YYYYMMDD format'];
+        }
+        if (!preg_match('/^\d{1,6}$/', (string)$time)) {
+            return ['error' => 'Time must be in HHMMSS format'];
+        }
+
+        $start_min = mcp_datetime_to_min($date, $time);
+        $end_min = $start_min + max(0, (int)$duration);
+
+        // Widen by a day on each side so events that span midnight are seen.
+        $prev = mcp_shift_date($date, -1);
+        $next = mcp_shift_date($date, 1);
+
+        $sql = "SELECT e.cal_id, e.cal_name, e.cal_date, e.cal_time, e.cal_duration
+                FROM webcal_entry e
+                INNER JOIN webcal_entry_user eu ON e.cal_id = eu.cal_id
+                WHERE eu.cal_login = ? AND e.cal_date BETWEEN ? AND ? AND e.cal_time != -1
+                ORDER BY e.cal_date, e.cal_time";
+
+        $events = [];
+        $res = dbi_execute($sql, [$this->userLogin, $prev, $next]);
+        if ($res) {
+            while ($row = dbi_fetch_row($res)) {
+                $s = mcp_datetime_to_min($row[2], $row[3]);
+                $events[] = [
+                    'id' => $row[0],
+                    'name' => $row[1],
+                    'date' => $row[2],
+                    'time' => $row[3],
+                    'duration' => (int)$row[4],
+                    'start' => $s,
+                    'end' => $s + max(0, (int)$row[4])
+                ];
+            }
+            dbi_free_result($res);
+        }
+
+        $conflicts = array_map(
+            fn($c) => [
+                'id' => $c['id'],
+                'name' => $c['name'],
+                'date' => $c['date'],
+                'time' => $c['time'],
+                'duration' => $c['duration']
+            ],
+            mcp_find_conflicts($start_min, $end_min, $events)
+        );
+
+        return ['has_conflict' => !empty($conflicts), 'conflicts' => $conflicts];
+    }
+
+    #[McpTool(description: 'Add a recurring event described by an RFC 5545 RRULE')]
+    public function add_recurring_event(
+        string $name,
+        string $date,
+        string $rrule,
+        string $time = '-1',
+        int $duration = 0,
+        string $description = '',
+        string $location = ''
+    ): array {
+        if (!is_mcp_write_enabled()) {
+            return ['error' => 'MCP write access is not enabled'];
+        }
+        if (empty($name)) {
+            return ['error' => 'Event name is required'];
+        }
+        if (!preg_match('/^\d{8}$/', $date)) {
+            return ['error' => 'Date must be in YYYYMMDD format'];
+        }
+
+        // Time: -1 (untimed) or HHMMSS in the GMT frame.
+        $cal_time = -1;
+        if ((string)$time !== '' && (string)$time !== '-1') {
+            if (!preg_match('/^\d{1,6}$/', (string)$time)) {
+                return ['error' => 'Time must be in HHMMSS format or -1 for untimed'];
+            }
+            $cal_time = (int)$time;
+        }
+
+        // Validate the RRULE against the WebCalendar-supported subset and map
+        // it to webcal_entry_repeats columns (defense in depth: never trust
+        // the client, even though the agent validates too).
+        $validated = mcp_validate_rrule($rrule);
+        if (!$validated['valid']) {
+            return ['error' => 'Invalid RRULE: ' . $validated['error']];
+        }
+        $repeat_cols = mcp_rrule_to_repeat_columns($validated['parts']);
+
+        // Insert the base event, assigning cal_id as MAX(cal_id)+1 with a
+        // retry-on-collision loop (same pattern/rationale as add_event).
+        $now = date('Ymd');
+        $mod_time = date('His');
+        $sql = "INSERT INTO webcal_entry (cal_id, cal_name, cal_date, cal_time, cal_duration, cal_description, cal_location, cal_create_by, cal_mod_date, cal_mod_time)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $event_id = null;
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $res = dbi_execute('SELECT MAX(cal_id) FROM webcal_entry');
+            if (!$res) {
+                return ['error' => 'Failed to create event'];
+            }
+            $row = dbi_fetch_row($res);
+            $candidate_id = ($row[0] ?? 0) + 1;
+            dbi_free_result($res);
+
+            $res = dbi_execute(
+                $sql,
+                [$candidate_id, $name, $date, $cal_time, $duration, $description, $location, $this->userLogin, $now, $mod_time],
+                false,
+                false
+            );
+            if ($res) {
+                $event_id = $candidate_id;
+                break;
+            }
+        }
+        if ($event_id === null) {
+            return ['error' => 'Failed to create event'];
+        }
+
+        // Participation row.
+        dbi_execute(
+            "INSERT INTO webcal_entry_user (cal_id, cal_login, cal_status) VALUES (?, ?, 'A')",
+            [$event_id, $this->userLogin]
+        );
+
+        // Insert the recurrence row. If it fails, roll back the base event so
+        // we never leave an orphan non-repeating entry behind.
+        $repeat_cols = array_merge(['cal_id' => $event_id], $repeat_cols);
+        $cols = array_keys($repeat_cols);
+        $placeholders = implode(', ', array_fill(0, count($cols), '?'));
+        $rsql = 'INSERT INTO webcal_entry_repeats (' . implode(', ', $cols)
+            . ') VALUES (' . $placeholders . ')';
+        $rres = dbi_execute($rsql, array_values($repeat_cols));
+        if (!$rres) {
+            dbi_execute('DELETE FROM webcal_entry_user WHERE cal_id = ?', [$event_id]);
+            dbi_execute('DELETE FROM webcal_entry WHERE cal_id = ?', [$event_id]);
+            return ['error' => 'Failed to store recurrence rule'];
+        }
+
+        activity_log($event_id, $this->userLogin, $this->userLogin, 'M', 'MCP: Recurring event created');
+
+        return [
+            'success' => true,
+            'event_id' => $event_id,
+            'cal_type' => $repeat_cols['cal_type']
+        ];
+    }
+
+    #[McpTool(description: 'Update fields of an event the user created')]
+    public function update_event(
+        int $event_id,
+        ?string $name = null,
+        ?string $date = null,
+        $time = null,
+        $duration = null,
+        ?string $description = null,
+        ?string $location = null
+    ): array {
+        if (!is_mcp_write_enabled()) {
+            return ['error' => 'MCP write access is not enabled'];
+        }
+        if ($event_id <= 0) {
+            return ['error' => 'A valid event_id is required'];
+        }
+
+        $owner = $this->eventOwner($event_id);
+        if ($owner === null) {
+            return ['error' => 'Event not found'];
+        }
+        if ($owner !== $this->userLogin) {
+            return ['error' => 'Not authorized to modify this event'];
+        }
+
+        // Only the provided fields are updated (null means "leave unchanged").
+        $sets = [];
+        $vals = [];
+        if ($name !== null) {
+            $sets[] = 'cal_name = ?';
+            $vals[] = $name;
+        }
+        if ($date !== null) {
+            if (!preg_match('/^\d{8}$/', $date)) {
+                return ['error' => 'Date must be in YYYYMMDD format'];
+            }
+            $sets[] = 'cal_date = ?';
+            $vals[] = $date;
+        }
+        if ($time !== null) {
+            if ((string)$time !== '-1' && !preg_match('/^\d{1,6}$/', (string)$time)) {
+                return ['error' => 'Time must be in HHMMSS format or -1 for untimed'];
+            }
+            $sets[] = 'cal_time = ?';
+            $vals[] = (int)$time;
+        }
+        if ($duration !== null) {
+            $sets[] = 'cal_duration = ?';
+            $vals[] = (int)$duration;
+        }
+        if ($description !== null) {
+            $sets[] = 'cal_description = ?';
+            $vals[] = $description;
+        }
+        if ($location !== null) {
+            $sets[] = 'cal_location = ?';
+            $vals[] = $location;
+        }
+
+        if (empty($sets)) {
+            return ['error' => 'No fields to update'];
+        }
+
+        $sets[] = 'cal_mod_date = ?';
+        $vals[] = date('Ymd');
+        $sets[] = 'cal_mod_time = ?';
+        $vals[] = date('His');
+        $vals[] = $event_id;
+
+        $res = dbi_execute(
+            'UPDATE webcal_entry SET ' . implode(', ', $sets) . ' WHERE cal_id = ?',
+            $vals
+        );
+        if (!$res) {
+            return ['error' => 'Failed to update event'];
+        }
+
+        activity_log($event_id, $this->userLogin, $this->userLogin, 'M', 'MCP: Event updated');
+        return ['success' => true, 'event_id' => $event_id];
+    }
+
+    #[McpTool(description: 'Delete an event the user created')]
+    public function delete_event(int $event_id): array
+    {
+        if (!is_mcp_write_enabled()) {
+            return ['error' => 'MCP write access is not enabled'];
+        }
+        if ($event_id <= 0) {
+            return ['error' => 'A valid event_id is required'];
+        }
+
+        $owner = $this->eventOwner($event_id);
+        if ($owner === null) {
+            return ['error' => 'Event not found'];
+        }
+        if ($owner !== $this->userLogin) {
+            return ['error' => 'Not authorized to delete this event'];
+        }
+
+        // Remove the event and every row that references it, including any
+        // recurrence rule and its exceptions/inclusions.
+        dbi_execute('DELETE FROM webcal_entry WHERE cal_id = ?', [$event_id]);
+        dbi_execute('DELETE FROM webcal_entry_user WHERE cal_id = ?', [$event_id]);
+        dbi_execute('DELETE FROM webcal_entry_repeats WHERE cal_id = ?', [$event_id]);
+        dbi_execute('DELETE FROM webcal_entry_repeats_not WHERE cal_id = ?', [$event_id]);
+
+        activity_log($event_id, $this->userLogin, $this->userLogin, 'M', 'MCP: Event deleted');
+        return ['success' => true, 'event_id' => $event_id];
+    }
+
+    /**
+     * Return the login that created an event (cal_create_by), or null if the
+     * event does not exist. Used for the update/delete ownership check.
+     */
+    private function eventOwner(int $event_id): ?string
+    {
+        $res = dbi_execute(
+            'SELECT cal_create_by FROM webcal_entry WHERE cal_id = ?',
+            [$event_id]
+        );
+        if (!$res) {
+            return null;
+        }
+        $row = dbi_fetch_row($res);
+        dbi_free_result($res);
+        return $row ? $row[0] : null;
+    }
 }
 
 // Handle transport based on execution context
