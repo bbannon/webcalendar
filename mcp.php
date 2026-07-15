@@ -368,11 +368,14 @@ class WebCalendarMcpTools
 
         // Query events
         $events = [];
+        // cal_status IN ('A','W') excludes deleted ('D') and rejected ('R')
+        // events, matching the core UI's event queries (see includes/functions.php).
         $sql = "SELECT e.cal_id, e.cal_name, e.cal_date, e.cal_time, e.cal_duration,
                        e.cal_description, e.cal_location, e.cal_priority
                 FROM webcal_entry e
                 INNER JOIN webcal_entry_user eu ON e.cal_id = eu.cal_id
-                WHERE eu.cal_login = ? AND e.cal_date BETWEEN ? AND ?
+                WHERE eu.cal_login = ? AND eu.cal_status IN ('A','W')
+                      AND e.cal_date BETWEEN ? AND ?
                 ORDER BY e.cal_date, e.cal_time";
 
         $res = dbi_execute($sql, [$this->userLogin, $query_start, $query_end]);
@@ -436,10 +439,12 @@ class WebCalendarMcpTools
         $limit = max(1, min(100, $limit));
 
         $events = [];
+        // Exclude deleted/rejected events (cal_status IN ('A','W')), as the UI does.
         $sql = "SELECT e.cal_id, e.cal_name, e.cal_date, e.cal_time, e.cal_description
                 FROM webcal_entry e
                 INNER JOIN webcal_entry_user eu ON e.cal_id = eu.cal_id
-                WHERE eu.cal_login = ? AND (e.cal_name LIKE ? OR e.cal_description LIKE ?)
+                WHERE eu.cal_login = ? AND eu.cal_status IN ('A','W')
+                      AND (e.cal_name LIKE ? OR e.cal_description LIKE ?)
                 ORDER BY e.cal_date DESC, e.cal_time DESC
                 LIMIT " . (int)$limit;
 
@@ -558,10 +563,12 @@ class WebCalendarMcpTools
             return ['error' => 'Dates must be in YYYYMMDD format'];
         }
 
+        // Exclude deleted/rejected events (cal_status IN ('A','W')), as the UI does.
         $sql = "SELECT e.cal_id, e.cal_name, e.cal_date, e.cal_time, e.cal_duration
                 FROM webcal_entry e
                 INNER JOIN webcal_entry_user eu ON e.cal_id = eu.cal_id
-                WHERE eu.cal_login = ? AND e.cal_date BETWEEN ? AND ?
+                WHERE eu.cal_login = ? AND eu.cal_status IN ('A','W')
+                      AND e.cal_date BETWEEN ? AND ?
                 ORDER BY e.cal_date, e.cal_time";
 
         $busy = [];
@@ -607,10 +614,12 @@ class WebCalendarMcpTools
         $prev = mcp_shift_date($date, -1);
         $next = mcp_shift_date($date, 1);
 
+        // Exclude deleted/rejected events (cal_status IN ('A','W')), as the UI does.
         $sql = "SELECT e.cal_id, e.cal_name, e.cal_date, e.cal_time, e.cal_duration
                 FROM webcal_entry e
                 INNER JOIN webcal_entry_user eu ON e.cal_id = eu.cal_id
-                WHERE eu.cal_login = ? AND e.cal_date BETWEEN ? AND ? AND e.cal_time != -1
+                WHERE eu.cal_login = ? AND eu.cal_status IN ('A','W')
+                      AND e.cal_date BETWEEN ? AND ? AND e.cal_time != -1
                 ORDER BY e.cal_date, e.cal_time";
 
         $events = [];
