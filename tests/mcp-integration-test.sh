@@ -223,13 +223,15 @@ echo "--- Test: Tools List ---"
 RESPONSE=$(mcp_call "tools/list" "{}")
 
 TOOL_COUNT=$(echo "$RESPONSE" | jq '.result.tools | length')
-if [ "$TOOL_COUNT" = "4" ]; then
-  pass "Returns 4 tools"
+if [ "$TOOL_COUNT" = "9" ]; then
+  pass "Returns 9 tools"
 else
-  fail "Expected 4 tools, got $TOOL_COUNT" "$RESPONSE"
+  fail "Expected 9 tools, got $TOOL_COUNT" "$RESPONSE"
 fi
 
-for TOOL in list_events get_user_info search_events add_event; do
+for TOOL in list_events get_user_info search_events add_event \
+            get_availability check_conflicts add_recurring_event \
+            update_event delete_event; do
   if echo "$RESPONSE" | jq -e ".result.tools[] | select(.name == \"$TOOL\")" > /dev/null 2>&1; then
     pass "Tool '$TOOL' is listed"
   else
