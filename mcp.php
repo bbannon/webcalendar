@@ -328,12 +328,12 @@ load_global_settings();
 // Import MCP SDK
 if ( ! file_exists( 'includes/mcp-loader.php' ) || ! class_exists( 'Mcp\Server' ) ) {
   if ( php_sapi_name() === 'cli' ) {
-    fwrite( STDERR, "Error: MCP SDK not found. Run 'composer require mcp/sdk' to install.\n" );
+    fwrite( STDERR, "Error: MCP SDK not found. Run 'composer install' to install.\n" );
   } else {
     header( 'Content-Type: application/json' );
     echo json_encode( [
       'error' => 'MCP server is not available',
-      'message' => 'The MCP SDK PHP package must be installed. Run: composer require mcp/sdk'
+      'message' => 'The MCP SDK PHP package must be installed. Run: composer install'
     ] );
   }
   exit( 1 );

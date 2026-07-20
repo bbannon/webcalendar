@@ -765,7 +765,7 @@ if ( ! $error ) {
     <fieldset class="border p-2"><legend>' . translate('MCP Server Configuration') . '</legend>'
     . ( ! is_mcp_available()
       ? '<p class="bold"><span style="color: #cc0000;">' . translate( 'MCP Server is not available.' ) . '</span></p><p>'
-        . translate( 'The MCP SDK PHP package must be installed. Run: composer require mcp/sdk' ) . '</p>'
+        . translate( 'The MCP SDK PHP package must be installed. Run: composer install' ) . '</p>'
       : '<div class="form-inline mt-1 mb-2"><label title="' . tooltip ( 'mcp-server-enabled-help' ) . '">'
         . translate ( 'MCP Server enabled' ) . ':</label>'
         . print_radio ( 'MCP_SERVER_ENABLED', '', '', 'N' ) . '</div>
