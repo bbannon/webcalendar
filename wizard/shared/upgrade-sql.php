@@ -668,6 +668,24 @@ SQL
   ],
   [
     'version' => 'v1.9.21',
-    'default-sql' => ''
+    // Ensure webcal_user.cal_passwd is wide enough for a bcrypt hash (60
+    // chars). The original widening lived only in the v1.9.0 block, so any
+    // database already past v1.9.0 with a still-narrow column (e.g. a legacy
+    // VARCHAR(32) sized for MD5) never got widened. On the first login after
+    // upgrade, user_valid_login() rehashes the password to bcrypt; writing 60
+    // chars into that column fails on strict-mode MySQL/MariaDB and aborts the
+    // login with "Error executing query." Widen it here so every upgrade path
+    // is covered. Re-running MODIFY on an already-VARCHAR(255) column is a
+    // harmless no-op.
+    'default-sql' => <<<'SQL'
+ALTER TABLE webcal_user MODIFY cal_passwd VARCHAR(255);
+SQL,
+    'postgresql-sql' => <<<'SQL'
+ALTER TABLE webcal_user ALTER COLUMN cal_passwd TYPE VARCHAR(255);
+SQL,
+    // SQLite does not enforce VARCHAR length (column types are dynamic), so no
+    // change is needed. An explicit empty entry prevents the default-sql
+    // (MySQL MODIFY) fallback, which SQLite cannot parse.
+    'sqlite3-sql' => ''
   ],
 ];
