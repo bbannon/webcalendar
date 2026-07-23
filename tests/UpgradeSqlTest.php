@@ -66,6 +66,51 @@ final class UpgradeSqlTest extends TestCase
     $this->assertLessThan($modifyPos, $updatePos, 'UPDATE must come before MODIFY');
   }
 
+  /**
+   * Issue #676: webcal_user.cal_passwd must be widened to VARCHAR(255) on any
+   * upgrade path, not just from pre-v1.9.0. A database already past v1.9.0 that
+   * still has a narrow (MD5-sized) column would otherwise fail on the first
+   * login after upgrade, when user_valid_login() rehashes the password to a
+   * 60-char bcrypt hash -- strict-mode MySQL/MariaDB rejects the write and the
+   * login dies with "Error executing query."
+   */
+  public function test_cal_passwd_widened_when_upgrading_from_post_v190_mysql(): void
+  {
+    $sql = getSqlUpdates('v1.9.12', 'mysql', false);
+    $joined = implode("\n", $sql);
+    $this->assertStringContainsStringIgnoringCase(
+      'MODIFY cal_passwd VARCHAR(255)',
+      $joined,
+      'A v1.9.12 -> latest upgrade must widen cal_passwd to hold a bcrypt hash'
+    );
+  }
+
+  public function test_cal_passwd_widened_when_upgrading_from_post_v190_postgres(): void
+  {
+    $sql = getSqlUpdates('v1.9.12', 'postgresql', false);
+    $joined = implode("\n", $sql);
+    $this->assertStringContainsStringIgnoringCase(
+      'ALTER COLUMN cal_passwd TYPE VARCHAR(255)',
+      $joined,
+      'Postgres v1.9.12 -> latest upgrade must widen cal_passwd'
+    );
+  }
+
+  /**
+   * SQLite does not enforce VARCHAR length and cannot parse MySQL "MODIFY",
+   * so the widening step must not leak the default-sql (MySQL) statement to it.
+   */
+  public function test_cal_passwd_widening_not_sent_to_sqlite(): void
+  {
+    $sql = getSqlUpdates('v1.9.12', 'sqlite3', false);
+    $joined = implode("\n", $sql);
+    $this->assertStringNotContainsStringIgnoringCase(
+      'MODIFY cal_passwd',
+      $joined,
+      'SQLite must not receive the MySQL MODIFY cal_passwd statement'
+    );
+  }
+
   public function test_multiple_primary_key_error_is_ignored(): void
   {
     $ref = new ReflectionClass(WizardDatabase::class);
