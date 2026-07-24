@@ -111,6 +111,9 @@ if ( $is_nonuser_admin ) {
   if ( $is_admin ) {
     $names[] = translate ( 'Delete Events' );
     $links[] = 'purge.php';
+
+    $names[] = translate ( 'Export for WordPress' );
+    $links[] = 'export_wordpress.php';
   }
   /*
  This Activity Log link shows ALL activity for ALL events, so you really need
