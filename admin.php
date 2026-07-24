@@ -789,7 +789,26 @@ if ( ! $error ) {
         <div class="form-inline mt-1 mb-2"><label for="admin_MCP_CORS_CUSTOM" title="' . tooltip ( 'mcp-cors-custom-help' ) . '">'
         . translate ( 'Custom Origins (comma-separated)' ) . ':</label>
         <input type="text" size="40" name="admin_MCP_CORS_CUSTOM" id="admin_MCP_CORS_CUSTOM" value="'
-        . htmlspecialchars ( (!empty($s['MCP_CORS_ORIGINS']) && $s['MCP_CORS_ORIGINS'] !== '*' && strpos($s['MCP_CORS_ORIGINS'], ',') !== false) ? $s['MCP_CORS_ORIGINS'] : '' ) . '" placeholder="https://example.com,https://another.com"></div>' )
+        . htmlspecialchars ( (!empty($s['MCP_CORS_ORIGINS']) && $s['MCP_CORS_ORIGINS'] !== '*' && strpos($s['MCP_CORS_ORIGINS'], ',') !== false) ? $s['MCP_CORS_ORIGINS'] : '' ) . '" placeholder="https://example.com,https://another.com"></div>'
+        . '<hr class="mt-2">'
+        . '<div class="mt-1"><strong>' . translate ( 'MCP Endpoint URL' ) . ':</strong> '
+        . '<code>' . htmlspecialchars ( getServerUrl() . 'mcp.php' ) . '</code></div>'
+        . '<p class="mt-1"><small>'
+        . translate ( 'Each user connects their AI agent with their own personal API token, generated on their Preferences MCP tab, where a ready-to-use sample configuration is shown.' )
+        . '</small></p>'
+        . '<details class="mt-1"><summary>' . translate ( 'Sample agent configuration' ) . '</summary>'
+        . '<pre class="border rounded p-2 mt-1" style="white-space:pre-wrap;">'
+        . htmlspecialchars ( '{
+  "mcpServers": {
+    "webcalendar": {
+      "url": "' . getServerUrl() . 'mcp.php",
+      "headers": {
+        "X-MCP-Token": "YOUR_MCP_TOKEN"
+      }
+    }
+  }
+}' )
+        . '</pre></details>' )
     . '</fieldset>
   </div></div>
 
