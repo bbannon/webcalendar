@@ -62,17 +62,25 @@ function user_valid_login ( $login, $password, $silent=false ) {
       if ( $okay && $rehash ) {
         $new_hash = password_hash ( $password, PASSWORD_DEFAULT );
         $sql = 'UPDATE webcal_user SET cal_passwd = ? WHERE cal_login = ?';
-        dbi_execute ( $sql, [$new_hash, $login] );
-        // Verify the hash was stored correctly (column may be too narrow).
+        // Non-fatal: if cal_passwd is too narrow for the 60-char bcrypt hash,
+        // strict-mode MySQL/MariaDB rejects this write with an error. Letting
+        // dbi_execute() fatal here would abort the login with a bare "Error
+        // executing query." Instead we swallow the failure and fall through to
+        // the verify/revert path below so the user can still log in (their
+        // password simply stays in the old format until the column is widened).
+        dbi_execute ( $sql, [$new_hash, $login], false, false );
+        // Verify the hash was stored correctly (column may be too narrow, or
+        // the write above may have been rejected/truncated).
         $res2 = dbi_execute (
           'SELECT cal_passwd FROM webcal_user WHERE cal_login = ?', [$login] );
         if ( $res2 ) {
           $row2 = dbi_fetch_row ( $res2 );
           dbi_free_result ( $res2 );
           if ( ! $row2 || $row2[0] !== $new_hash ) {
-            // Hash was truncated; revert to the old hash to avoid lockout.
+            // New hash was not stored (rejected or truncated); restore the old
+            // hash to avoid lockout. Also non-fatal for the same reason.
             dbi_execute ( 'UPDATE webcal_user SET cal_passwd = ? WHERE cal_login = ?',
-              [$expected_hash, $login] );
+              [$expected_hash, $login], false, false );
           }
         }
       }
