@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Path in require_once\(\) "install/default_config\.php" is not a file or it does not exist\.$#'
-			identifier: requireOnce.fileNotFound
-			count: 1
-			path: admin.php
-
-		-
 			message: '#^Path in require_once\(\) "includes/classes/Event\.class" is not a file or it does not exist\.$#'
 			identifier: requireOnce.fileNotFound
 			count: 1
@@ -162,11 +156,6 @@ parameters:
 			count: 1
 			path: includes/init.php
 
-		-
-			message: '#^Call to sprintf contains 2 placeholders, 3 values given\.$#'
-			identifier: argument.sprintf
-			count: 1
-			path: includes/menu.php
 
 		-
 			message: '#^Array has 2 duplicate keys with value ''id'' \(''id'', ''id''\)\.$#'

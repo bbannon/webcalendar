@@ -184,11 +184,10 @@ if ( $DISPLAY_TASKS != 'Y' ) { ?>
   ? '10em' : $GLOBALS['MINICALWIDTH']; ?>;
 }
 
-<?php if (  $MENU_ENABLED == 'N' ) { ?>
-#dateselector form {
+/* Only present when the date selectors are rendered below the calendar. */
+#dateselector {
   border-top: 0.0625em solid var(--tablebg, <?php echo $GLOBALS['TABLEBG'];?>);
 }
-<?php } ?>
 
 <?php if ( ! empty ( $GLOBALS['BGIMAGE'] ) ) { ?>
 body {

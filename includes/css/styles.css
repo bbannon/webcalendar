@@ -227,19 +227,10 @@ img.color {
 #cat {
   font-size:1.125rem;
 }
-#dateselector,
 #trailer {
   margin:0;
   padding:0;
 }
-#dateselector form {
-  float:left;
-  width:33%;
-  margin-top:.3125rem;
-  margin-bottom:1.5625rem;
-  padding-top:.3125rem;
-}
-#dateselector label,
 #trailer label {
   margin:0;
   padding:0;
