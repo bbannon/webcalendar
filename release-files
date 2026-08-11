@@ -144,6 +144,7 @@ includes/css/rss-style.css
 includes/css/styles.css
 includes/css/styles.php
 includes/date_formats.php
+includes/date_selectors.php
 includes/dbi4php.php
 includes/dbtable.php
 includes/formvars.php

@@ -383,6 +383,17 @@ function print_trailer( $include_nav_links = true, $closeDb = true,
   if ($MENU_ENABLED != 'N') {
     $ret .= '<script src="./includes/js/menu.js"></script>' . "\n";
   }
+  // The Month/Week/Year selectors live in the top menu by default. Put them
+  // here instead when the admin asked for that, or when the top menu is
+  // disabled entirely and so has nowhere to hold them. Installs predating the
+  // MENU_DATE_TOP setting have no webcal_config row for it, so default to top.
+  if( $include_nav_links && ! $friendly
+    && ( $MENU_ENABLED == 'N' || ( $MENU_DATE_TOP ?? 'Y' ) == 'N' ) ) {
+    require_once 'date_selectors.php';
+    $ret .= '<nav id="dateselector"'
+     . ' class="navbar navbar-expand-lg navbar-light bg-light">' . "\n"
+     . date_selectors_html() . "</nav>\n";
+  }
   if( $include_nav_links && ! $friendly ) {
     if( $MENU_ENABLED == 'N' )
       require_once 'includes/trailer.php';
