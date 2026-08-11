@@ -529,10 +529,12 @@ final class McpTest extends TestCase
     
     // No single operation should take more than 500ms
     $this->assertLessThan(0.5, $maxResponseTime, "Maximum response time too high: {$maxResponseTime}s");
-    
-    // Response times should be reasonably consistent (no extreme outliers)
-    $stdDev = $this->calculateStandardDeviation($responseTimes);
-    $this->assertLessThan(0.05, $stdDev, "Response times too inconsistent: std dev {$stdDev}s");
+
+    // NOTE: Deliberately no assertion on the spread of $responseTimes. A
+    // standard-deviation bound is dominated by whichever single sample landed
+    // during a scheduling hiccup on a shared CI runner, so it measures the
+    // runner rather than WebCalendar. The average and maximum bounds above are
+    // what actually catch a regression. See issue #698.
   }
 
   /**
@@ -592,9 +594,12 @@ final class McpTest extends TestCase
       
       $requestEnd = microtime(true);
       
-      // Rate limit check should be very fast
+      // Rate limit check should be fast with no history. Wall-clock bound, so
+      // it matches the generous with-history bound below rather than trying to
+      // measure true latency on a shared runner. The aggregate assertion on
+      // $noHistoryTime is what bounds the loop as a whole.
       $requestDuration = $requestEnd - $requestStart;
-      $this->assertLessThan(0.01, $requestDuration, "Rate limit check took too long: {$requestDuration}s");
+      $this->assertLessThan(0.5, $requestDuration, "Rate limit check took too long: {$requestDuration}s");
       
       // Result should be consistent
       $this->assertFalse($isRateLimited, "Should not be rate limited with no history");
@@ -656,20 +661,6 @@ final class McpTest extends TestCase
     // Even with more entries, 100 checks should complete quickly. Generous
     // wall-clock bound to stay green on slow CI while catching O(n^2) blowups.
     $this->assertLessThan(5.0, $scalingTime, "Rate limiting with scaling took too long: {$scalingTime}s");
-  }
-
-  // Helper method to calculate standard deviation
-  private function calculateStandardDeviation($array) {
-    if (count($array) === 0) return 0;
-    
-    $mean = array_sum($array) / count($array);
-    $variance = 0;
-    
-    foreach ($array as $value) {
-      $variance += pow($value - $mean, 2);
-    }
-    
-    return sqrt($variance / count($array));
   }
 
   // ---------------------------------------------------------------
