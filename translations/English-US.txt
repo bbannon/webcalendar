@@ -1870,6 +1870,7 @@ My Reports: My Reports
 Your Settings: Your Settings
 My Profile: My Profile
 Admin Settings: Admin Settings
+Export for WordPress: Export for WordPress
 Settings for: Settings for
 Public Calendar: Public Calendar
 Unapproved Events: Unapproved Events
