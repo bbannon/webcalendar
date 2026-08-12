@@ -62,7 +62,7 @@ print_header();
     translate('Wizard directory exists'),
     (!is_dir('wizard')),
     translate('The wizard/ directory is still present. It is password-protected, but you may restrict access for extra security.') . ' '
-    . translate('Options: restrict permissions') . ' (<code>chmod 000 wizard/</code>), '
+    . translate('Options - restrict permissions') . ' (<code>chmod 000 wizard/</code>), '
     . translate('move outside web root, or remove it') . ' (<code>rm -rf wizard/</code>).'
   );
 
@@ -367,7 +367,7 @@ function render_file_integrity_section(): void
     $msg = str_replace(
       'XXX',
       $verify->reason,
-      translate('Manifest signature FAILED: XXX')
+      translate('Manifest signature FAILED - XXX')
     );
     echo '<div class="alert alert-danger"><strong>'
       . htmlspecialchars($msg, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
