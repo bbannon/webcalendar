@@ -537,44 +537,12 @@ final class McpTest extends TestCase
     // what actually catch a regression. See issue #698.
   }
 
-  /**
-   * Test memory usage patterns under load.
-   */
-  public function testMemoryUsagePatterns() {
-    $userLogin = 'testuser';
-    $token = 'test_token_12345';
-    $this->testDb->createApiToken($userLogin, $token);
-    
-    $baselineMemory = memory_get_usage();
-    
-    // Create events in batches and measure memory
-    $memoryMeasurements = [];
-    for ($batch = 1; $batch <= 5; $batch++) {
-      $batchStartMemory = memory_get_usage();
-      
-      // Create 10 events in this batch
-      for ($i = 1; $i <= 10; $i++) {
-        $eventId = $this->testDb->createEvent($userLogin, 20240601 + ($batch * 10) + $i, "Memory Batch $batch Event $i");
-        $this->testDb->associateUserWithEvent($eventId, $userLogin);
-      }
-      
-      $batchEndMemory = memory_get_usage();
-      $batchMemoryUsed = $batchEndMemory - $batchStartMemory;
-      $memoryMeasurements[] = $batchMemoryUsed;
-    }
-    
-    // Memory usage should grow linearly, not exponentially
-    $avgMemoryPerBatch = array_sum($memoryMeasurements) / count($memoryMeasurements);
-    
-    // No single batch should use excessive memory (more than 2MB)
-    foreach ($memoryMeasurements as $memoryUsed) {
-      $this->assertLessThan(2 * 1024 * 1024, $memoryUsed, "Single batch used too much memory: {$memoryUsed} bytes");
-    }
-    
-    // Total memory increase should be reasonable
-    $totalMemoryIncrease = memory_get_usage() - $baselineMemory;
-    $this->assertLessThan(20 * 1024 * 1024, $totalMemoryIncrease, 'Total memory increase too high');
-  }
+  // NOTE: testMemoryUsagePatterns was removed here. It created events in five
+  // batches of ten and asserted each batch used under 2MB, but every batch
+  // measured exactly 0 bytes -- the rows go to SQLite and PHP frees the
+  // per-iteration allocations, so nothing accumulates on the heap. The
+  // assertions could not fail. testPerformanceBaselines above still bounds
+  // memory during event creation. See issue #698.
 
   /**
    * Test performance impact of rate limiting.
