@@ -305,6 +305,7 @@ if ( $NONUSER_ENABLED == 'Y' || $PUBLIC_ACCESS == 'Y' ) {
 <?php if ( $ALLOW_COLOR_CUSTOMIZATION == 'Y' ) { ?>
   <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#colors"><?php etranslate('Colors');?></a></li>
 <?php } ?>
+<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#mcp"><?php etranslate('MCP');?></a></li>
 
 </ul>
 
@@ -684,20 +685,6 @@ for ( $i = 0, $cnt = count ( $views ); $i < $cnt; $i++ ) {
   <nobr><input class="form-control" type="text" name="pref_AUTO_REFRESH_TIME" size="3" value="<?php echo ( empty ( $prefarray['AUTO_REFRESH_TIME'] ) ? 0 : $prefarray['AUTO_REFRESH_TIME'] ); ?>"> <?php etranslate ( 'minutes' )?></nobr>
  </td></tr>
 
- <tr><td data-toggle="tooltip" data-placement="top" title="<?php etooltip ("mcp-api-token-help");?>">
-  <label for="mcp_api_token"><?php etranslate ( 'MCP API Token' )?>:</label></td><td class="form-inline mt-1">
-<?php if ( ! empty ( $mcp_new_token ) ) { ?>
-  <input class="form-control" type="text" id="mcp_api_token_display" size="40" readonly value="<?php echo htmlspecialchars($mcp_new_token); ?>">
-  <div class="text-warning mt-1"><?php etranslate('Copy this token now. For security it is stored hashed and cannot be shown again.'); ?></div>
-<?php } else { ?>
-  <input class="form-control" type="text" id="mcp_api_token_display" size="40" readonly
-    value="<?php echo $mcp_token_is_set ? '************************ (token set)' : ''; ?>">
-<?php } ?>
-  <button type="button" class="btn btn-secondary ml-2" onclick="generateApiToken()"><?php etranslate('Generate New Token');?></button>
-<?php if ( $mcp_token_is_set || ! empty ( $mcp_new_token ) ) { ?>
-  <button type="button" class="btn btn-outline-danger ml-2" onclick="clearApiToken()"><?php etranslate('Clear Token');?></button>
-<?php } ?>
- </td></tr>
  </table>
 </fieldset>
 </div>
@@ -902,6 +889,46 @@ if ( $CUSTOM_TRAILER == 'Y' ) { ?>
 <!-- END HEADER -->
 <?php } // if $ALLOW_USER_HEADER ?>
 
+<!-- BEGIN MCP -->
+<div class="tab-pane container fade" id="mcp"><div class="form-group">
+<fieldset class="border p-2">
+ <legend><?php etranslate ('MCP Server')?></legend>
+ <table style="border-collapse: separate; border-spacing: 1px; padding: 2px;">
+ <tr><td data-toggle="tooltip" data-placement="top" title="<?php etooltip ("mcp-api-token-help");?>">
+  <label for="mcp_api_token"><?php etranslate ( 'MCP API Token' )?>:</label></td><td class="form-inline mt-1">
+<?php if ( ! empty ( $mcp_new_token ) ) { ?>
+  <input class="form-control" type="text" id="mcp_api_token_display" size="40" readonly value="<?php echo htmlspecialchars($mcp_new_token); ?>">
+  <div class="text-warning mt-1"><?php etranslate('Copy this token now. For security it is stored hashed and cannot be shown again.'); ?></div>
+<?php } else { ?>
+  <input class="form-control" type="text" id="mcp_api_token_display" size="40" readonly
+    value="<?php echo $mcp_token_is_set ? '************************ (token set)' : ''; ?>">
+<?php } ?>
+  <button type="button" class="btn btn-secondary ml-2" onclick="generateApiToken()"><?php etranslate('Generate New Token');?></button>
+<?php if ( $mcp_token_is_set || ! empty ( $mcp_new_token ) ) { ?>
+  <button type="button" class="btn btn-outline-danger ml-2" onclick="clearApiToken()"><?php etranslate('Clear Token');?></button>
+<?php } ?>
+ </td></tr>
+ </table>
+<?php $mcp_endpoint = getServerUrl() . 'mcp.php'; ?>
+ <div class="mt-2"><strong><?php etranslate('MCP Endpoint URL')?>:</strong>
+  <code><?php echo htmlspecialchars($mcp_endpoint); ?></code></div>
+ <div class="mt-2"><strong><?php etranslate('Sample agent configuration')?>:</strong>
+  <div class="text-muted"><small><?php etranslate('Paste this into your AI agent MCP settings file (for example, mcp_settings.json).')?></small></div>
+<?php
+  $mcp_sample_token = ! empty ( $mcp_new_token ) ? $mcp_new_token : 'YOUR_MCP_TOKEN';
+  $mcp_sample = "{\n  \"mcpServers\": {\n    \"webcalendar\": {\n      \"url\": \""
+    . $mcp_endpoint . "\",\n      \"headers\": {\n        \"X-MCP-Token\": \""
+    . $mcp_sample_token . "\"\n      }\n    }\n  }\n}";
+?>
+  <pre class="border rounded p-2 mt-1" style="white-space:pre-wrap;"><?php echo htmlspecialchars($mcp_sample); ?></pre>
+<?php if ( empty ( $mcp_new_token ) ) { ?>
+  <div class="text-muted"><small><?php etranslate('Replace YOUR_MCP_TOKEN with a token generated above.')?></small></div>
+<?php } ?>
+ </div>
+</fieldset>
+</div></div>
+<!-- END MCP -->
+
 <!-- BEGIN COLORS -->
 
 <?php if ( $ALLOW_COLOR_CUSTOMIZATION == 'Y' ) { ?>
@@ -912,7 +939,7 @@ if ( $CUSTOM_TRAILER == 'Y' ) { ?>
 <div><a href="#" class="btn btn-secondary" onclick="reset_colors(); return false;"><?php etranslate('Reset Colors');?></a></div>
 
 
-</td><td class="aligncenter aligntop" style="inline-size: 50%">
+</td><td class="aligncenter aligntop colorpreview" style="inline-size: 50%">
 <br>
 <!-- BEGIN EXAMPLE MONTH -->
 <p class="bold" style="text-align:center; color: var(--h2color)">
@@ -923,10 +950,11 @@ if ( $CUSTOM_TRAILER == 'Y' ) { ?>
 ?>
 <!-- END EXAMPLE MONTH -->
 </td></tr></table>
-</div>
+</div><!-- .form-group -->
+</div><!-- #colors .tab-pane -->
 <!-- END COLORS -->
 <?php } // if $ALLOW_COLOR_CUSTOMIZATION ?>
-</div>
+</div><!-- .tab-content -->
 
 <!-- END TABS -->
 <br><br>
@@ -944,7 +972,7 @@ etranslate ( 'Save Preferences' )?></button>
 foreach ( $colors as $k => $v ) {
   echo "function color_change_handler_$k() {\n";
     echo "  var color = $('#pref_" . $k . "').val();\n";
-    echo "  $('body').get(0).style.setProperty('--" . strtolower($k) . "', color);\n";
+    echo "  $('body').get(0).style.setProperty('--" . str_replace( '_', '', strtolower( $k ) ) . "', color);\n";
   echo "}\n";
 }
 ?>
@@ -952,7 +980,7 @@ foreach ( $colors as $k => $v ) {
 function reset_colors() {
   <?php
     foreach ( $colors as $k => $v ) {
-      echo "  $('body').get(0).style.setProperty('--" . strtolower($k) . "', '$GLOBALS[$k]');\n";
+      echo "  $('body').get(0).style.setProperty('--" . str_replace( '_', '', strtolower( $k ) ) . "', '$GLOBALS[$k]');\n";
       echo "  $('#pref_" . $k . "').val('$GLOBALS[$k]');\n";
     }
   ?>

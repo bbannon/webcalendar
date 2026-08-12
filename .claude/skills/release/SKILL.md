@@ -44,6 +44,19 @@ git log HEAD..origin/master --oneline               # expect: empty
 
 If on a different branch or working tree is dirty: stop and ask the user how to proceed. Do **not** auto-stash or auto-checkout.
 
+**Release-manifest coverage check.** Every git-tracked file must be classified: listed in `release-files` (ships in the ZIP) or matched by `release-files-excluded` (dev-only). Past releases shipped broken because new files were committed without updating `release-files` (#667, missing translations, `export_wordpress.php`).
+
+```bash
+# Enforced invariant — fails if any tracked file is unclassified
+vendor/bin/phpunit -c tests/phpunit.xml --filter ReleaseFilesConsistencyTest
+
+# Files added since the last release, with their classification
+PREV_TAG=$(git describe --tags --abbrev=0)
+git diff --diff-filter=A --name-only "$PREV_TAG"..HEAD
+```
+
+Show the user the list of files added since `PREV_TAG` and, for each, whether it ships (`release-files`) or is excluded (`release-files-excluded`). Ask the user to confirm the classification of any **newly added file that landed in the excluded set** — a runtime file wrongly excluded is exactly the drift that broke past releases. If the test fails, stop: classify the offending files (with the user) before proceeding.
+
 Compute the new version:
 - If user supplied `vX.Y.Z`, use that.
 - Otherwise: `bump_version.sh` will auto-increment the patch when called with no arg.
@@ -233,6 +246,8 @@ git push origin master master:release vX.Y.Z
 
 Pushing to `release` is what triggers `.github/workflows/release.yml`: full CI suite → build zip → cosign signing → GitHub release. The tag must exist at push time so `actions/create-release@v1` reuses it instead of attempting to mint a new one.
 
+The `release` push also triggers `.github/workflows/docker.yml`, which builds a multi-arch image and pushes four Docker Hub tags: `craigk5n/webcalendar:X.Y.Z` (bare version), `X.Y.Z-php8-apache`, `latest-php8-apache`, and `latest`. No manual Docker step is needed.
+
 **If `release` is far behind master** (it can drift between releases), the FF will include all intermediate commits. Confirm with the user before pushing if `git rev-list --count origin/release..origin/master` is unexpectedly high.
 
 ---
@@ -283,7 +298,9 @@ Tell the user:
 - Tag pushed: `vX.Y.Z`
 - Branches updated: `master`, `release`
 - CI run: pass/fail link
-- Anything left manual (e.g., announcement post, Docker tag)
+- Docker Hub tags pushed by docker.yml (`X.Y.Z`, `X.Y.Z-php8-apache`, `latest-php8-apache`, `latest`) — spot-check with:
+  `curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:craigk5n/webcalendar:pull"` for a token, then HEAD `https://registry-1.docker.io/v2/craigk5n/webcalendar/manifests/X.Y.Z` (the hub.docker.com tag-listing API lags; the registry API is authoritative)
+- Anything left manual (e.g., announcement post)
 
 ---
 

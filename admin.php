@@ -1,8 +1,10 @@
 <?php
 require_once 'includes/init.php';
 require_once 'includes/date_formats.php';
-if ( file_exists ( 'install/default_config.php' ) )
-  require_once 'install/default_config.php';
+// Provides db_load_config(). Do NOT load the obsolete pre-1.9.13
+// install/default_config.php here; leftover copies from old installs
+// use each(), which was removed in PHP 8.
+require_once 'wizard/shared/default_config.php';
 
 // Force the CSS cache to clear by incrementing webcalendar_csscache cookie.
 // admin.php will not use this cached CSS, but we want to make sure it's flushed.
@@ -61,7 +63,7 @@ if ( ! empty ( $_POST ) && empty ( $error ) ) {
 }
 
 // Load any new config settings. Existing ones will not be affected.
-// This function is in the install/default_config.php file.
+// This function is in the wizard/shared/default_config.php file.
 if ( function_exists ( 'db_load_config' ) && empty ( $_POST ) )
   db_load_config();
 
@@ -217,10 +219,16 @@ if ( ! $error ) {
 
   foreach ( $colors as $k => $v ) {
     $GLOBALS[$k] = $s[$k];
-    // Change the color in the current page
-    $cch .= "      function color_change_handler_$k() {\n        var color = $('#admin_' + $k).val();\n\n        $('body').get(0).style.setProperty('--' + $k.toLowerCase, color);\n      }\n";
+    // CSS custom-property name for this color (matches styles.php :root, e.g.
+    // POPUP_BG -> --popupbg). The id/value must be baked into the emitted JS
+    // strings (not concatenated with a bare $k, which would be an undefined JS
+    // identifier), and the color value must be quoted (an unquoted #ffffff is a
+    // JS syntax error that would break the whole <script>).
+    $vn = str_replace ( '_', '', strtolower ( $k ) );
+    // Change the color in the current page live as the user edits it.
+    $cch .= "      function color_change_handler_$k() {\n        var color = $('#admin_" . $k . "').val();\n        $('body').get(0).style.setProperty('--" . $vn . "', color);\n      }\n";
     $color_sets .= print_color_input_html ( $k, $v, '', '', 'p', '', 'color_change_handler_' . $k );
-    $rc .= "\n        $('#admin_' + $k).val(" . $GLOBALS[$k] . ");\n        $('body').get(0).style.setProperty('--' + $k.toLowerCase, '" . $GLOBALS[$k] . "');\n";
+    $rc .= "\n        $('#admin_" . $k . "').val('" . $GLOBALS[$k] . "');\n        $('body').get(0).style.setProperty('--" . $vn . "', '" . $GLOBALS[$k] . "');\n";
   }
 
   $csp = ( $s['CSP'] ?: 'none' );
@@ -789,7 +797,26 @@ if ( ! $error ) {
         <div class="form-inline mt-1 mb-2"><label for="admin_MCP_CORS_CUSTOM" title="' . tooltip ( 'mcp-cors-custom-help' ) . '">'
         . translate ( 'Custom Origins (comma-separated)' ) . ':</label>
         <input type="text" size="40" name="admin_MCP_CORS_CUSTOM" id="admin_MCP_CORS_CUSTOM" value="'
-        . htmlspecialchars ( (!empty($s['MCP_CORS_ORIGINS']) && $s['MCP_CORS_ORIGINS'] !== '*' && strpos($s['MCP_CORS_ORIGINS'], ',') !== false) ? $s['MCP_CORS_ORIGINS'] : '' ) . '" placeholder="https://example.com,https://another.com"></div>' )
+        . htmlspecialchars ( (!empty($s['MCP_CORS_ORIGINS']) && $s['MCP_CORS_ORIGINS'] !== '*' && strpos($s['MCP_CORS_ORIGINS'], ',') !== false) ? $s['MCP_CORS_ORIGINS'] : '' ) . '" placeholder="https://example.com,https://another.com"></div>'
+        . '<hr class="mt-2">'
+        . '<div class="mt-1"><strong>' . translate ( 'MCP Endpoint URL' ) . ':</strong> '
+        . '<code>' . htmlspecialchars ( getServerUrl() . 'mcp.php' ) . '</code></div>'
+        . '<p class="mt-1"><small>'
+        . translate ( 'Each user connects their AI agent with their own personal API token, generated on their Preferences MCP tab, where a ready-to-use sample configuration is shown.' )
+        . '</small></p>'
+        . '<details class="mt-1"><summary>' . translate ( 'Sample agent configuration' ) . '</summary>'
+        . '<pre class="border rounded p-2 mt-1" style="white-space:pre-wrap;">'
+        . htmlspecialchars ( '{
+  "mcpServers": {
+    "webcalendar": {
+      "url": "' . getServerUrl() . 'mcp.php",
+      "headers": {
+        "X-MCP-Token": "YOUR_MCP_TOKEN"
+      }
+    }
+  }
+}' )
+        . '</pre></details>' )
     . '</fieldset>
   </div></div>
 
@@ -879,10 +906,10 @@ if ( ! $error ) {
           <fieldset class="border p-2">
             <legend>' . translate ( 'Color options' ) . '</legend>
 <!-- BEGIN EXAMPLE MONTH -->
-            <p style="float:right; width:45%; margin:0; background: var(--background)">
+            <div class="colorpreview" style="float:right; width:45%; margin:0; background: var(--bgcolor)">
               <p id="monthtitle" class="bold" style="text-align:center; color: var(--h2color)">' . date_to_str ( date ( 'Ymd' ), $DATE_FORMAT_MY, false ) . '</p>'
    . display_month ( date ( 'm' ), date ( 'Y' ), true ) . '
-
+            </div>
 <!-- END EXAMPLE MONTH -->
             <p class="form-inline mt-1 mb-2"><label>' . translate ( 'Allow user to customize colors' )
    . ':</label>' . print_radio ( 'ALLOW_COLOR_CUSTOMIZATION' ) . '</p>

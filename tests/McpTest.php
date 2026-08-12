@@ -529,50 +529,20 @@ final class McpTest extends TestCase
     
     // No single operation should take more than 500ms
     $this->assertLessThan(0.5, $maxResponseTime, "Maximum response time too high: {$maxResponseTime}s");
-    
-    // Response times should be reasonably consistent (no extreme outliers)
-    $stdDev = $this->calculateStandardDeviation($responseTimes);
-    $this->assertLessThan(0.05, $stdDev, "Response times too inconsistent: std dev {$stdDev}s");
+
+    // NOTE: Deliberately no assertion on the spread of $responseTimes. A
+    // standard-deviation bound is dominated by whichever single sample landed
+    // during a scheduling hiccup on a shared CI runner, so it measures the
+    // runner rather than WebCalendar. The average and maximum bounds above are
+    // what actually catch a regression. See issue #698.
   }
 
-  /**
-   * Test memory usage patterns under load.
-   */
-  public function testMemoryUsagePatterns() {
-    $userLogin = 'testuser';
-    $token = 'test_token_12345';
-    $this->testDb->createApiToken($userLogin, $token);
-    
-    $baselineMemory = memory_get_usage();
-    
-    // Create events in batches and measure memory
-    $memoryMeasurements = [];
-    for ($batch = 1; $batch <= 5; $batch++) {
-      $batchStartMemory = memory_get_usage();
-      
-      // Create 10 events in this batch
-      for ($i = 1; $i <= 10; $i++) {
-        $eventId = $this->testDb->createEvent($userLogin, 20240601 + ($batch * 10) + $i, "Memory Batch $batch Event $i");
-        $this->testDb->associateUserWithEvent($eventId, $userLogin);
-      }
-      
-      $batchEndMemory = memory_get_usage();
-      $batchMemoryUsed = $batchEndMemory - $batchStartMemory;
-      $memoryMeasurements[] = $batchMemoryUsed;
-    }
-    
-    // Memory usage should grow linearly, not exponentially
-    $avgMemoryPerBatch = array_sum($memoryMeasurements) / count($memoryMeasurements);
-    
-    // No single batch should use excessive memory (more than 2MB)
-    foreach ($memoryMeasurements as $memoryUsed) {
-      $this->assertLessThan(2 * 1024 * 1024, $memoryUsed, "Single batch used too much memory: {$memoryUsed} bytes");
-    }
-    
-    // Total memory increase should be reasonable
-    $totalMemoryIncrease = memory_get_usage() - $baselineMemory;
-    $this->assertLessThan(20 * 1024 * 1024, $totalMemoryIncrease, 'Total memory increase too high');
-  }
+  // NOTE: testMemoryUsagePatterns was removed here. It created events in five
+  // batches of ten and asserted each batch used under 2MB, but every batch
+  // measured exactly 0 bytes -- the rows go to SQLite and PHP frees the
+  // per-iteration allocations, so nothing accumulates on the heap. The
+  // assertions could not fail. testPerformanceBaselines above still bounds
+  // memory during event creation. See issue #698.
 
   /**
    * Test performance impact of rate limiting.
@@ -592,9 +562,12 @@ final class McpTest extends TestCase
       
       $requestEnd = microtime(true);
       
-      // Rate limit check should be very fast
+      // Rate limit check should be fast with no history. Wall-clock bound, so
+      // it matches the generous with-history bound below rather than trying to
+      // measure true latency on a shared runner. The aggregate assertion on
+      // $noHistoryTime is what bounds the loop as a whole.
       $requestDuration = $requestEnd - $requestStart;
-      $this->assertLessThan(0.01, $requestDuration, "Rate limit check took too long: {$requestDuration}s");
+      $this->assertLessThan(0.5, $requestDuration, "Rate limit check took too long: {$requestDuration}s");
       
       // Result should be consistent
       $this->assertFalse($isRateLimited, "Should not be rate limited with no history");
@@ -656,20 +629,6 @@ final class McpTest extends TestCase
     // Even with more entries, 100 checks should complete quickly. Generous
     // wall-clock bound to stay green on slow CI while catching O(n^2) blowups.
     $this->assertLessThan(5.0, $scalingTime, "Rate limiting with scaling took too long: {$scalingTime}s");
-  }
-
-  // Helper method to calculate standard deviation
-  private function calculateStandardDeviation($array) {
-    if (count($array) === 0) return 0;
-    
-    $mean = array_sum($array) / count($array);
-    $variance = 0;
-    
-    foreach ($array as $value) {
-      $variance += pow($value - $mean, 2);
-    }
-    
-    return sqrt($variance / count($array));
   }
 
   // ---------------------------------------------------------------
