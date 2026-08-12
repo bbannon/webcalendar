@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Removed
+
+## [v1.9.23] - 2026-08-12
+
+### Added
+
 - Admin "Export for WordPress" is now reachable from the Admin Settings menu. It was previously linked only from the trailer's Admin page, so sites that disable the trailer had no way to reach it (#681)
 
 ### Changed

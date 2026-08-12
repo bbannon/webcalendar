@@ -697,4 +697,8 @@ SQL,
     // (MySQL MODIFY) fallback, which SQLite cannot parse.
     'sqlite3-sql' => ''
   ],
+  [
+    'version' => 'v1.9.23',
+    'default-sql' => ''
+  ],
 ];
