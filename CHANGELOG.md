@@ -9,9 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Admin "Export for WordPress" is now reachable from the Admin Settings menu. It was previously linked only from the trailer's Admin page, so sites that disable the trailer had no way to reach it (#681)
+
 ### Changed
 
+- English-US translations are now 100% complete: 24 missing phrases filled in, and 59 stale entries removed that no longer correspond to any `translate()` call (leftovers from the removed `install/` directory). Three phrases containing a colon were reworded — the translation parser splits each line on the first colon, so `Options: restrict permissions`, `Manifest signature FAILED: XXX`, and `The MCP SDK PHP package must be installed. Run: composer install` could never be translated in any language (#701)
+- Docker Hub images are now also published under a bare version tag (for example `webcalendar:1.9.23`) alongside the existing `-php8-apache` and `latest` tags
+- Upgraded dev dependency `squizlabs/php_codesniffer` from 4.0.1 to 4.0.4, resolving CVE-2026-67434. Dev-only — `vendor/` is not shipped in releases, so this was never a runtime exposure (#697)
+- CI: removed two unreliable assertions from the MCP test suite — a wall-clock standard-deviation bound that failed at random on shared runners, and a memory test whose assertions could never fail because every measurement was zero (#698)
+- CI: PHPStan passes again; two baseline ignore patterns no longer matched any reported error, which PHPStan treats as a failure (#696)
+
 ### Fixed
+
+- Month/Week/Year date selectors appear at the bottom of the page again when the top menu is disabled, and the Admin "Date Selectors position" setting works once more. Both broke in v1.9.0, when the Bootstrap navbar rewrite moved the selectors into the top menu and left `MENU_DATE_TOP` read by nothing — disabling the top menu removed the selectors entirely, with no way to get them back (#695)
+- Admin page no longer loads the obsolete `install/default_config.php` (#693)
 
 ### Removed
 
