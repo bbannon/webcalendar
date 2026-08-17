@@ -170,12 +170,6 @@ parameters:
 			path: includes/translate.php
 
 		-
-			message: '#^Undefined variable\: \$PUBLIC_ACCESS_FULLNAME$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/user-ldap.php
-
-		-
 			message: '#^Cannot unset offset ''Until'' on array\{Exceptions\: array\{\}, Inclusions\: array\{\}\}\|array\{Exceptions\: list, Inclusions\: list, Frequency\: 7\}\.$#'
 			identifier: unset.offset
 			count: 1
