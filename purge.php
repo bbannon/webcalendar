@@ -20,7 +20,6 @@ if ( ! $is_admin ) {
   exit;
 }
 
-$ALL = 0;
 // Set this to true do show the SQL at the bottom of the page
 $purgeDebug = false;
 $sqlLog     = '';
@@ -35,9 +34,10 @@ $do_purge = ( ! empty ( $delete ) );
 
 $purge_all = getPostValue ( 'purge_all' );
 $purge_deleted = getPostValue ( 'purge_deleted' );
-$end_year = getPostValue ( 'end_year' );
-$end_month = getPostValue ( 'end_month' );
-$end_day = getPostValue ( 'end_day' );
+// date_selection() renders a single HTML5 date input named "end__YMD"
+// (prefix "end_" + "_YMD"), not the three end_year/end_month/end_day
+// fields this page used to read.
+$end_date = str_replace ( '-', '', getPostValue ( 'end__YMD' ) );
 $username = getPostValue ( 'username' );
 $preview = ( ! empty ( getPostValue ( 'preview' ) ) );
 
@@ -65,37 +65,7 @@ if ( $do_purge ) {
     echo "$purgingStr: $username";
 
   echo "</h2>\n";
-  $end_date = sprintf ( "%04d%02d%02d", $end_year, $end_month, $end_day );
-  $ids = $tail = '';
-  if ( $purge_deleted == 'Y' )
-    $tail = " AND weu.cal_status = 'D' ";
-
-  if ( $purge_all == 'Y' ) {
-    if ( $username == 'ALL' ) {
-      $ids =  ['ALL'];
-    } else {
-      $ids = get_ids ( 'SELECT cal_id FROM webcal_entry '
-        . " WHERE cal_create_by = '$username' $tail" );
-    }
-  } elseif ( $end_date ) {
-    if ( $username != 'ALL' ) {
-      $tail = " AND we.cal_create_by = '$username' $tail";
-    } else {
-      $tail = '';
-      $ALL = 1;  // Need this to tell get_ids to ignore participant check
-    }
-    $E_ids = get_ids ( 'SELECT we.cal_id FROM webcal_entry we, webcal_entry_user weu ' .
-      "WHERE cal_type = 'E' AND cal_date < '$end_date' $tail",
-      $ALL );
-    $M_ids = get_ids ( 'SELECT DISTINCT(we.cal_id) FROM webcal_entry we,
-      webcal_entry_user weu, webcal_entry_repeats wer
-      WHERE we.cal_type = \'M\'
-      AND we.cal_id = wer.cal_id AND weu.cal_id = wer.cal_id '
-      . "AND cal_end IS NOT NULL AND cal_end < '$end_date' $tail",
-      $ALL );
-    $ids = array_merge ( $E_ids, $M_ids );
-  }
-  //echo "event ids: <ul><li>" . implode ( "</li><li>", $ids ) . "</li></ul>\n";
+  $ids = get_purge_ids ( $purge_all, $username, $end_date, $purge_deleted );
   if ( count ( $ids ) > 0 ) {
     purge_events ( $ids );
   } else {
@@ -153,7 +123,7 @@ if ( $do_purge ) {
   <input class="form-control-sm" type="checkbox" name="preview" value="Y" checked>
  </td></tr>
  <tr><td colspan="2">
-   <button class="btn btn-primary" name="delete" type="submit" onclick="return
+   <button class="btn btn-primary" name="delete" value="Y" type="submit" onclick="return
  confirm('<?php
  etranslate ( 'Are you sure you want to delete events for', true ) ?> ' +
  document.forms[0].username.value + '?')"><?php echo $deleteStr?></button>
@@ -164,6 +134,64 @@ if ( $do_purge ) {
 </td></tr></table>
 
 <?php echo print_trailer();
+/**
+ * get_purge_ids
+ *
+ * Work out which event ids a purge would affect.  Extracted from the page
+ * body so the selection rules can be regression-tested directly -- see
+ * tests/PurgeEventSelectionTest.php.
+ *
+ * @param  string $purge_all      'Y' to purge every event for the user
+ * @param  string $username       Calendar login, or 'ALL' for every user
+ * @param  string $end_date       YYYYMMDD cutoff; events before it are purged
+ * @param  string $purge_deleted  'Y' to restrict to events marked deleted
+ *
+ * @return array  Event ids, or the single entry 'ALL' to purge everything
+ */
+function get_purge_ids ( $purge_all, $username, $end_date, $purge_deleted ) {
+  $ALL = 0;  // Tells get_ids whether to skip the "no other participants" check
+  $tail = '';
+  // Every query below joins webcal_entry_user as weu, so this stays valid
+  // no matter which branch we take.
+  if ( $purge_deleted == 'Y' )
+    $tail = " AND weu.cal_status = 'D' ";
+
+  if ( $purge_all == 'Y' ) {
+    if ( $username == 'ALL' )
+      return ['ALL'];
+
+    return get_ids ( 'SELECT DISTINCT we.cal_id
+      FROM webcal_entry we, webcal_entry_user weu
+      WHERE weu.cal_id = we.cal_id AND we.cal_create_by = ?' . $tail,
+      [$username] );
+  }
+
+  if ( empty ( $end_date ) )
+    return [];
+
+  $params = [$end_date];
+  if ( $username == 'ALL' ) {
+    $ALL = 1;
+  } else {
+    // Append, never overwrite: $tail may already carry the "deleted only"
+    // restriction the admin asked for.
+    $tail .= ' AND we.cal_create_by = ?';
+    $params[] = $username;
+  }
+  $E_ids = get_ids ( 'SELECT DISTINCT we.cal_id
+    FROM webcal_entry we, webcal_entry_user weu
+    WHERE weu.cal_id = we.cal_id
+    AND we.cal_type = \'E\' AND we.cal_date < ?' . $tail,
+    $params, $ALL );
+  $M_ids = get_ids ( 'SELECT DISTINCT we.cal_id FROM webcal_entry we,
+    webcal_entry_user weu, webcal_entry_repeats wer
+    WHERE we.cal_type = \'M\'
+    AND we.cal_id = wer.cal_id AND weu.cal_id = wer.cal_id
+    AND wer.cal_end IS NOT NULL AND wer.cal_end < ?' . $tail,
+    $params, $ALL );
+
+  return array_merge ( $E_ids, $M_ids );
+}
 /**
  * purge_events
  *
@@ -217,9 +245,11 @@ function purge_events ( $ids ) {
     }
   }
   $xxxStr = translate( 'Records deleted from XXX' );
+  // Only a preview run may claim to be one -- a real purge is irreversible.
+  $prefix = ( $preview ? '[' . $previewStr . '] ' : '' );
   for ( $i = 0; $i < $cnt; $i++ ) {
     $table = $tables[$i][0];
-    echo '[' . $previewStr . '] ' .
+    echo $prefix .
       str_replace( 'XXX', " $table: {$num[$i]}" , $xxxStr ) .
       "<br>\n";
   }
@@ -227,15 +257,16 @@ function purge_events ( $ids ) {
 /**
  * get_ids
  *
- * @param  mixed  $sql
- * @param  mixed  $ALL
+ * @param  string $sql     Query returning cal_id in the first column
+ * @param  array  $params  Values to bind to the query's placeholders
+ * @param  mixed  $ALL     Set to 1 to skip the "no other participants" check
  */
-function get_ids ( $sql, $ALL = '' ) {
+function get_ids ( $sql, $params = [], $ALL = '' ) {
   global $sqlLog;
 
   $ids = [];
   $sqlLog .= $sql . "<br>\n";
-  $res = dbi_execute ( $sql );
+  $res = dbi_execute ( $sql, $params );
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
       if ($ALL == 1)

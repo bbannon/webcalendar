@@ -235,10 +235,11 @@ if ( ! empty ( $CUSTOM_HEADER ) && $CUSTOM_HEADER == 'Y' ) {
   echo load_template ( $login, 'H' );
 }
 ?>
-<div id="login-container" class="container">
-<div class="row pl-3">
+<div id="login-container">
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-8 col-md-6 col-lg-4">
   <form id="login-form" class="form" action="login.php" method="post">
-    <div class="row justify-content-md-center">
+    <div class="text-center">
       <h3><?php echo htmlentities($appStr); ?> Login</h3>
     </div>
   <?php if ( ! empty ( $message )) { ?>
@@ -251,19 +252,19 @@ if ( ! empty ( $CUSTOM_HEADER ) && $CUSTOM_HEADER == 'Y' ) {
       <?php echo $error; ?>
     </div>
   <?php } ?>
-    <div class="form-group row">
-      <label for="login" class="text-info">Username:</label><br>
+    <div class="form-group">
+      <label for="user" class="text-info">Username:</label><br>
       <input type="text" name="login" id="user" class="form-control">
     </div>
-    <div class="form-group row">
+    <div class="form-group">
       <label for="password" class="text-info">Password:</label><br>
       <input type="password" name="password" id="password" class="form-control">
     </div>
-    <div class="form-group form-check row">
+    <div class="form-group form-check">
       <input type="checkbox" class="form-check-input" id="remember-me" name="remember" value="yes">
-      <label class="form-check-label" for="exampleCheck1">Remember me</label>
+      <label class="form-check-label" for="remember-me">Remember me</label>
     </div>
-    <div class="form-group row justify-content-md-center">
+    <div class="form-group text-center">
       <button class="btn btn-primary" type="submit"><?php
  etranslate ( 'Submit' )?></button>
     </div>
@@ -276,7 +277,7 @@ if ( ! empty ( $CUSTOM_HEADER ) && $CUSTOM_HEADER == 'Y' ) {
       $accessStr = translate ( 'Access XXX calendar' );
       for ( $i = 0, $cnt = count ( $cals ); $i < $cnt; $i++ ) {
         if ( $cals[$i]['cal_is_public'] == 'Y' ) {
-          echo '<li id="form_' . $cals[$i]['cal_login'] . '" class="form-group row">' .
+          echo '<li id="form_' . $cals[$i]['cal_login'] . '" class="form-group">' .
             '<a class="nav" href="nulogin.php?login=' . $cals[$i]['cal_login'] . '">'
             . str_replace ( 'XXX', $cals[$i]['cal_fullname'], $accessStr )
             . '</a></li>';
@@ -290,13 +291,14 @@ if ( ! empty ( $CUSTOM_HEADER ) && $CUSTOM_HEADER == 'Y' ) {
         $valid_ip = validate_domain();
 
         if ( ! empty ( $valid_ip ) ) {
-          echo '<div id="register-link" class="form-group row"><a href="register.php">'
+          echo '<div id="register-link" class="form-group"><a href="register.php">'
            . translate ( 'Not yet registered? Register here!' ) . '</a></div>';
         }
       }
     ?>
 
   </form>
+  </div>
 </div>
 </div>
 
