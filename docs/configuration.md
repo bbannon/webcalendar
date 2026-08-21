@@ -121,7 +121,7 @@ Common settings (partial list):
 | `MCP_RATE_LIMIT` | integer | MCP requests per minute limit |
 
 Defaults for all settings are defined in
-`wizard/shared/default_config.php`.
+`includes/default_config.php`.
 
 ## User Preferences
 

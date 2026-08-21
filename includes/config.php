@@ -188,7 +188,7 @@ function do_config($callingFromInstall=false)
   // Define possible app settings and their types
   $possible_settings = $config_possible_settings;
 
-  // When changing PROGRAM VERSION, also change it in wizard/shared/default_config.php
+  // When changing PROGRAM VERSION, also change it in includes/default_config.php
   $PROGRAM_VERSION = 'v1.9.23';
   // Update PROGRAM_DATE with official release data
   $PROGRAM_DATE = '12 Aug 2026';

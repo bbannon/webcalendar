@@ -374,7 +374,7 @@ def get_expected_version():
     
     # Fallback: parse directly from default_config.php
     try:
-        with open("/work/wizard/shared/default_config.php", "r") as f:
+        with open("/work/includes/default_config.php", "r") as f:
             content = f.read()
             match = re.search(r"'WEBCAL_PROGRAM_VERSION' => '([^']+)'", content)
             if match:

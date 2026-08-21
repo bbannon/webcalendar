@@ -11,7 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Config defaults and `db_load_config()` moved from `wizard/shared/default_config.php` to `includes/default_config.php`. The wizard still reads it as the single source of truth, but it is no longer inside a directory administrators are told to delete (#707)
+
 ### Fixed
+
+- Admin Settings no longer returns a 500 error after following the security audit's advice to remove or `chmod 000` the `wizard/` directory. `admin.php` hard-required a file from `wizard/`, so either action made the page fatal (#707)
+- The security audit's "Wizard directory exists" check now passes when `wizard/` has been made unreadable. It only tested `is_dir()`, which still succeeds on a `chmod 000` directory, so the "restrict permissions" option the audit itself recommends could never clear the item (#707)
 
 ### Removed
 

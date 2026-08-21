@@ -55,7 +55,7 @@ For routine version upgrades within the 1.9.x line, see
 |----------------------------|-------------------|
 | `install/index.php` | `wizard/index.php` |
 | `install/sql/` | `wizard/shared/` |
-| `install/default_config.php` | `wizard/shared/default_config.php` |
+| `install/default_config.php` | `includes/default_config.php` |
 | `install/settings.php` (wizard password) | `includes/settings.php` (all config) |
 
 The old `install/` directory no longer exists. If your deployment scripts
