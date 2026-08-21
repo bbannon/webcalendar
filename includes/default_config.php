@@ -2,6 +2,10 @@
 /**
  * The file contains a listing of all the current WebCalendar config settings
  * and their default values.
+ *
+ * This lives in includes/ rather than wizard/ because admin.php needs
+ * db_load_config() at runtime, and the security audit tells administrators
+ * they may delete or chmod 000 the wizard/ directory after installing.
  */
 $webcalConfig = [
   'ADD_LINK_IN_VIEWS' => 'N',
@@ -163,7 +167,7 @@ $webcalConfig = [
 ];
 
 /**
- * db_load_config (needs description)
+ * db_load_config
  *
  * This function is defined here because admin.php calls it during startup.
  * Load default configuration values into the webcal_config table but only

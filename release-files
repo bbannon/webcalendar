@@ -147,6 +147,7 @@ includes/date_formats.php
 includes/date_selectors.php
 includes/dbi4php.php
 includes/dbtable.php
+includes/default_config.php
 includes/formvars.php
 includes/functions.php
 includes/gradient.php
@@ -472,7 +473,6 @@ wizard/WizardState.php
 wizard/WizardValidator.php
 wizard/headless.php
 wizard/index.php
-wizard/shared/default_config.php
 wizard/shared/tables-db2.sql
 wizard/shared/tables-ibase.sql
 wizard/shared/tables-mysql.sql

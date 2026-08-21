@@ -1,10 +1,12 @@
 <?php
 require_once 'includes/init.php';
 require_once 'includes/date_formats.php';
-// Provides db_load_config(). Do NOT load the obsolete pre-1.9.13
+// Provides db_load_config(). This lives in includes/ so that admin.php keeps
+// working after the wizard/ directory is removed or made unreadable, as the
+// security audit recommends. Do NOT load the obsolete pre-1.9.13
 // install/default_config.php here; leftover copies from old installs
 // use each(), which was removed in PHP 8.
-require_once 'wizard/shared/default_config.php';
+require_once 'includes/default_config.php';
 
 // Force the CSS cache to clear by incrementing webcalendar_csscache cookie.
 // admin.php will not use this cached CSS, but we want to make sure it's flushed.
@@ -63,7 +65,7 @@ if ( ! empty ( $_POST ) && empty ( $error ) ) {
 }
 
 // Load any new config settings. Existing ones will not be affected.
-// This function is in the wizard/shared/default_config.php file.
+// This function is in the includes/default_config.php file.
 if ( function_exists ( 'db_load_config' ) && empty ( $_POST ) )
   db_load_config();
 

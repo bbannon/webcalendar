@@ -105,8 +105,7 @@ wizard/
 │   ├── adminuser.php
 │   ├── summary.php
 │   └── finish.php
-└── shared/                # SQL schemas, config defaults, and upgrade logic
-    ├── default_config.php
+└── shared/                # SQL schemas and upgrade logic
     ├── tables-mysql.sql
     ├── tables-postgres.sql
     ├── tables-sqlite3.php

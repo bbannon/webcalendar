@@ -57,10 +57,14 @@ print_header();
     translate('You should change the password of the default admin user.')
   );
 
-  // Is the wizard directory still present?
+  // Is the wizard directory still present and reachable?  A directory that
+  // has been chmod 000'd still passes is_dir(), so check readability too --
+  // otherwise the "restrict permissions" advice below could never clear this
+  // item.  admin.php no longer needs anything from wizard/, so either fix is
+  // safe (see issue #707).
   print_issue(
     translate('Wizard directory exists'),
-    (!is_dir('wizard')),
+    (!is_dir('wizard') || !is_readable('wizard')),
     translate('The wizard/ directory is still present. It is password-protected, but you may restrict access for extra security.') . ' '
     . translate('Options - restrict permissions') . ' (<code>chmod 000 wizard/</code>), '
     . translate('move outside web root, or remove it') . ' (<code>rm -rf wizard/</code>).'

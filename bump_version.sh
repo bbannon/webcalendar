@@ -8,7 +8,7 @@
 #   ./bump_version.sh -p          # Print current version and exit
 #
 # Run this script before making a release. It updates the version number in:
-#   - wizard/shared/default_config.php  (WEBCAL_PROGRAM_VERSION)
+#   - includes/default_config.php        (WEBCAL_PROGRAM_VERSION)
 #   - wizard/shared/upgrade_matrix.php  (PROGRAM_VERSION)
 #   - includes/config.php               (PROGRAM_VERSION and PROGRAM_DATE)
 #   - composer.json                     (version field)
@@ -33,10 +33,10 @@ bump_version() {
     echo "v$major.$minor.$patch"
 }
 
-# Function to update version in wizard/shared/default_config.php
+# Function to update version in includes/default_config.php
 update_default_config_version() {
     local new_version="$1"
-    sed -i -E "s/('WEBCAL_PROGRAM_VERSION' => ')[^']*(')/\1$new_version\2/" wizard/shared/default_config.php
+    sed -i -E "s/('WEBCAL_PROGRAM_VERSION' => ')[^']*(')/\1$new_version\2/" includes/default_config.php
 }
 
 # Function to update version and date in includes/config.php
@@ -130,7 +130,7 @@ update_wizard_files() {
 # Function to print current version
 print_version() {
     local version
-    version=$(grep 'WEBCAL_PROGRAM_VERSION' wizard/shared/default_config.php | sed -E "s/.*'WEBCAL_PROGRAM_VERSION' => '([^']*)'.*/\1/")
+    version=$(grep 'WEBCAL_PROGRAM_VERSION' includes/default_config.php | sed -E "s/.*'WEBCAL_PROGRAM_VERSION' => '([^']*)'.*/\1/")
     echo "$version" | tr -d v
 }
 
@@ -141,7 +141,7 @@ if [ "$1" == "-p" ]; then
     exit 0
 elif [ "$#" -eq 0 ]; then
     # No arguments provided, bump the version
-    current_version=$(grep 'WEBCAL_PROGRAM_VERSION' wizard/shared/default_config.php | sed -E "s/.*'WEBCAL_PROGRAM_VERSION' => '([^']*)'.*/\1/")
+    current_version=$(grep 'WEBCAL_PROGRAM_VERSION' includes/default_config.php | sed -E "s/.*'WEBCAL_PROGRAM_VERSION' => '([^']*)'.*/\1/")
     new_version=$(bump_version "$current_version")
 else
     # Argument provided, use it as the new version

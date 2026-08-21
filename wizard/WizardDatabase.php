@@ -588,12 +588,12 @@ class WizardDatabase
 
   /**
    * Insert default config values for fresh installs.
-   * Reads from shared/default_config.php (single source of truth).
+   * Reads from ../includes/default_config.php (single source of truth).
    * Skips WEBCAL_PROGRAM_VERSION since loadBaseSchema already inserts it.
    */
   private function loadDefaultConfig(): bool
   {
-    require __DIR__ . '/shared/default_config.php';
+    require __DIR__ . '/../includes/default_config.php';
 
     foreach ($webcalConfig as $key => $val) {
       if ($key === 'WEBCAL_PROGRAM_VERSION') continue;
