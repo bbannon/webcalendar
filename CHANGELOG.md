@@ -17,6 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Admin Settings no longer returns a 500 error after following the security audit's advice to remove or `chmod 000` the `wizard/` directory. `admin.php` hard-required a file from `wizard/`, so either action made the page fatal (#707)
 - The security audit's "Wizard directory exists" check now passes when `wizard/` has been made unreadable. It only tested `is_dir()`, which still succeeds on a `chmod 000` directory, so the "restrict permissions" option the audit itself recommends could never clear the item (#707)
+- Purge Events now works at all. Its Delete button carried no `value` attribute, so browsers submitted an empty `delete=`, the `! empty()` guard never fired, and clicking Delete silently redisplayed the form. Reported by Tom (shycat.net)
+- Purge Events reads the date field the form actually renders. It looked for `end_year`/`end_month`/`end_day`, but `date_selection()` emits a single `end__YMD` input, so the cutoff was always `00000000` and a date-based purge matched nothing. Reported by Tom (shycat.net)
+- **Purge Events no longer ignores "Purge deleted only" when All users is selected.** That branch overwrote the SQL tail instead of appending to it, discarding the status restriction — an admin asking to purge deleted events would have irreversibly purged every event before the cutoff. This was unreachable only because the Delete button was inert; fixing the button without this would have armed it
+- Purge Events reports accurate row counts. Its date query joined `webcal_entry_user` with no join condition, producing a cartesian product that multiplied every count by the number of participant rows. Reported by Tom (shycat.net)
+- Purge Events no longer errors when "Purge deleted only" is used with a named user. That query filtered on `weu.cal_status` without `webcal_entry_user` in its `FROM` clause. Reported by Tom (shycat.net)
+- A completed purge is no longer labelled `[Preview]`. The results line hardcoded the prefix, so an irreversible delete reported itself as a dry run
+- Login page layout is centered and no longer double-padded. `#login-container` was a Bootstrap `.container` nested inside another `.container`, and every wrapper in the form used `.row` with no column child, so the negative row margins pulled the form off-centre and toward the screen edge on narrow viewports. Reported by Tom (shycat.net)
+- Login page labels are associated with their inputs. "Username:" pointed at `login`, which resolved to `<body id="login">` rather than the text field, and "Remember me" pointed at `exampleCheck1`, a leftover from the Bootstrap docs that does not exist on the page. Neither label did anything when clicked
 
 ### Removed
 
