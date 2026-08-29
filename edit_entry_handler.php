@@ -1,11 +1,13 @@
 <?php
 require_once 'includes/init.php';
+ob_start();
 require_once 'includes/classes/WebCalMailer.php';
 $mail = new WebCalMailer;
 
 load_user_categories();
 
 $do_override = false;
+$dberror = '';
 $error = '';
 $old_id = -1;
 
@@ -56,6 +58,7 @@ if( ! empty( $override ) && ! empty( $override_date ) ) {
   $old_id = $id;
 }
 
+$old_percent = [];
 $old_status = [];
 
 // Pass all string values through getPostValue.
@@ -772,11 +775,13 @@ if( empty( $error ) ) {
           || $extra_type == EXTRA_TEXT
           || $extra_type == EXTRA_URL
           || $extra_type == EXTRA_USER ) {
-        // We were passed an array instead of a string.
+        // Multi-select returns an array of selected option values; flatten
+        // it to a comma-separated string for storage. All other extras types
+        // already arrive as scalars from getPostValue() above and must be
+        // left alone — a prior "else $value = ''" here wiped every non-array
+        // site_extras value on save (#641).
         if( $extra_type == EXTRA_SELECTLIST && $extra_arg2 > 0 && is_array($value))
           $value = implode( ',', $value );
-        else
-          $value = '';
 
         $sql = 'INSERT INTO webcal_site_extras ( cal_id, cal_name, cal_type,
           cal_data ) VALUES ( ?, ?, ?, ? )';
@@ -1290,7 +1295,7 @@ if( ! empty( $conflicts ) ) {
   echo
   // Allow them to override a conflict if server settings allow it.
    ( ! empty( $ALLOW_CONFLICT_OVERRIDE ) && $ALLOW_CONFLICT_OVERRIDE == 'Y' ? '
-      <button name="confirm_conflicts" type="submit">'
+      <button name="confirm_conflicts" type="submit" value="' . translate( 'Save' ) . '">'
     . translate ( 'Save' ) . '</button>' : '' ) . '
       <button type="button" onclick="history.back()">'
     . translate ( 'Cancel' ) . '</button>
