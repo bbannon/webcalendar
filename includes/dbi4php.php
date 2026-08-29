@@ -126,6 +126,7 @@ function dbi_connect( $host, $login, $password, $database, $lazy = true ) {
         return false;
       }
 
+      $c->set_charset('utf8mb4');
       $db_connection_info['connected'] = true;
       $db_connection_info['connection'] = $GLOBALS['db_connection'] = $c;
       $db_connection_info['last_error'] = '';
@@ -167,6 +168,7 @@ function dbi_connect( $host, $login, $password, $database, $lazy = true ) {
     if( ! $c )
       return false;
 
+    pg_set_client_encoding($c, 'UTF8');
     $db_connection_info['connected']  = true;
     $db_connection_info['connection'] = $c;
     return $c;
@@ -362,7 +364,8 @@ function dbi_query( $sql, $fatalOnError = true, $showError = true ) {
     $res = sqlite_query( $GLOBALS['sqlite_c'], $sql, SQLITE_NUM );
   } elseif ( strcmp ( $GLOBALS['db_type'], 'sqlite3' ) == 0 ) {
     $found_db_type = true;
-    $res = $GLOBALS['sqlite3_c']->query ( $sql );
+    // Query method returns false on failure. Suppress warnings.
+    $res = @$GLOBALS['sqlite3_c']->query ( $sql );
   }
 
   if( $found_db_type ) {
@@ -810,13 +813,13 @@ function dbi_get_cached_rows ( $sql, $params = [],
       $fd = @fopen( $file, 'w+b', false );
 
       if( empty( $fd ) ) {
-        die_miserable_death ( "Cache Error.<br><br>The permissions for the db_cachedir will not allow creation of the following file:<br><blockquote>" .
-          $file . "</blockquote>", 'dbCacheError' );
+        // Cannot write cache file; disable caching and continue.
+        $db_connection_info['cachedir'] = '';
+      } else {
+        fwrite( $fd, serialize( $rows ) );
+        fclose( $fd );
+        chmod( $file, 0666 );
       }
-
-      fwrite( $fd, serialize( $rows ) );
-      fclose( $fd );
-      chmod( $file, 0666 );
     }
     return $rows;
   } else
@@ -833,7 +836,8 @@ function dbi_init_cache( $dir ) {
   if( ! isset( $db_connection_info ) )
     $db_connection_info = [];
 
-  $db_connection_info['cachedir'] = $dir;
+  if( ! empty( $dir ) && is_dir( $dir ) && is_writable( $dir ) )
+    $db_connection_info['cachedir'] = $dir;
 }
 
 /**
