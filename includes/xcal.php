@@ -245,7 +245,14 @@ function export_time ( $date, $duration, $time, $texport, $vtype = 'E' ) {
   global $TIMEZONE, $use_vtimezone, $vtimezone_data;
 
   $ret = $vtimezone_exists = '';
-  $eventstart = date_to_epoch ( $date . ( $time > 0 ? $time : 0 ), $time>0 );
+  // Stored cal_time is already UTC for timed events: edit_entry_handler.php
+  // converts local wall time to a UTC epoch via mktime() and writes it with
+  // gmdate('His', ...). Use gmmktime (via $gmt=true) here to round-trip the
+  // stored UTC value; using mktime would re-apply the server TZ offset and
+  // shift exported times (see issue #74 re-diagnosis). For all-day/untimed
+  // events ($time == 0 or -1) the time component is unused for DATE-only
+  // output, so gmmktime is safe there too.
+  $eventstart = date_to_epoch ( $date . ( $time > 0 ? $time : 0 ), $time > 0 );
   $eventend = $eventstart + ( $duration * 60 );
   if ( $time == 0 && $duration == 1440 && strcmp( $texport, 'ical' ) == 0 ) {
     // all day.
@@ -265,7 +272,11 @@ function export_time ( $date, $duration, $time, $texport, $vtype = 'E' ) {
     $dtstart = $date . 'T000000';
     if ( $use_vtimezone && ( $vtimezone_data = get_vtimezone ( $TIMEZONE, $dtstart ) ) ) {
       $vtimezone_exists = true;
-      $ret .= 'DTSTART;TZID=' . $TIMEZONE . ':' . $utc_start . "\r\n";
+      // RFC 5545: a TZID-tagged value MUST be LOCAL wall time in that zone
+      // and MUST NOT carry the 'Z' UTC suffix. date() converts the UTC epoch
+      // to the PHP default TZ's wall clock (which matches $TIMEZONE here).
+      $local_start = date ( 'Ymd\THis', $eventstart );
+      $ret .= 'DTSTART;TZID=' . $TIMEZONE . ':' . $local_start . "\r\n";
     } else {
       $ret .= "DTSTART:$utc_start\r\n";
     }
@@ -283,13 +294,22 @@ function export_time ( $date, $duration, $time, $texport, $vtype = 'E' ) {
       }else
         $ret .= 'DTEND;VALUE=DATE:' . gmdate ( 'Ymd', $eventend ) . "\r\n";
       }
-    else  if ( $time == -1 )
-    // untimed event
-     $ret .= "DTEND;VALUE=DATE:$date\r\n";
+    else  if ( $time == -1 ) {
+    // untimed event: DTEND is exclusive per RFC 5545, so use the next day
+      $nextday = gmdate ( 'Ymd', gmmktime ( 0, 0, 0,
+        (int)substr ( $date, 4, 2 ),
+        (int)substr ( $date, 6, 2 ) + 1,
+        (int)substr ( $date, 0, 4 ) ) );
+      $ret .= "DTEND;VALUE=DATE:$nextday\r\n";
+    }
     else if ( $time > 0 ) {
       // timed  event
       if ( $vtimezone_exists ) {
-        $ret .= 'DTEND;TZID=' . $TIMEZONE . ':' . date ( 'Ymd', $eventend ) . "T000000\r\n";
+        // Local wall time in $TIMEZONE, no 'Z' suffix (see DTSTART note).
+        // The prior code hard-coded T000000 here, which lost the event's
+        // actual end time and shifted exports to midnight.
+        $local_end = date ( 'Ymd\THis', $eventend );
+        $ret .= 'DTEND;TZID=' . $TIMEZONE . ':' . $local_end . "\r\n";
       }else {
         $utc_end = export_ts_utc_date ( $eventend );
         $ret .= "DTEND:$utc_end\r\n";
@@ -710,7 +730,7 @@ function export_get_event_entry( $id = 'all', $attachment = false ) {
     // calendars, particularly non-user calendars.
     // "webcal_entry_user.cal_id = '$id'";
     // there may be a better to do this
-    if ( $attachment == true && empty ( $login ) ) {
+    if ( $attachment == true ) {
       $sql .= ' OR weu.cal_login = we.cal_create_by';
     } else if ( ! empty ( $user ) && $user != $login ) {
       $sql .= ' OR weu.cal_login = ?';
@@ -1290,6 +1310,10 @@ function import_data ( $data, $overwrite, $type, $silent=false ) {
     }
     // Check for all day
     if ( ! empty ( $Entry['AllDay'] ) && $Entry['AllDay'] == 1 ) {
+      // Use local date (not gmdate) since all-day events are timezone-neutral
+      // and the timestamps were created in local timezone context.
+      $Entry['start_date'] = date ( 'Ymd', $Entry['StartTime'] );
+      $Entry['end_date'] = date ( 'Ymd', $Entry['EndTime'] );
       $Entry['start_time'] = 0;
       $Entry['end_time'] = 0;
       $Entry['Duration'] = '1440';
@@ -1646,7 +1670,7 @@ function import_data ( $data, $overwrite, $type, $silent=false ) {
       // update Categories
       if ( ! empty( $Entry['Categories'] ) || $importcat != '') {
         $cat_ids = ( $importcat != ''
-          ? get_categories_id_byname( function_exists("utf8_decode") ? utf8_decode( $importcat ) : $importcat )
+          ? get_categories_id_byname( $importcat )
           : $Entry['Categories'] );
 
         $cat_order = 1;
@@ -1935,14 +1959,101 @@ function import_data ( $data, $overwrite, $type, $silent=false ) {
   }
 }
 
+/**
+ * Validate a user-supplied URL before WebCalendar fetches it (remote calendar
+ * subscriptions, hCalendar import, etc.).
+ *
+ * This is an anti-SSRF control. Without it, an attacker could supply
+ * "file:///etc/passwd" (read via fopn URL wrappers) or "http://169.254.169.254/"
+ * (cloud metadata) / "http://127.0.0.1:.../" (internal services) and have the
+ * server fetch it and render the contents back as calendar data.
+ *
+ * Returns true only for http/https URLs whose host does not resolve to a
+ * loopback/private/link-local/reserved address. On failure, $err is populated.
+ *
+ * Note: this resolves DNS at validation time; a determined attacker could still
+ * attempt DNS rebinding. Restricting the scheme (below) eliminates the most
+ * severe local-file-read vector regardless.
+ */
+function webcal_validate_remote_url($url, &$err = '') {
+  $url = trim($url);
+  // PHP curl does not support webcal://; callers normalize it to http://.
+  $check = str_ireplace('webcal://', 'http://', $url);
+
+  $parts = parse_url($check);
+  if ($parts === false || empty($parts['scheme']) || empty($parts['host'])) {
+    $err = 'Invalid URL';
+    return false;
+  }
+  $scheme = strtolower($parts['scheme']);
+  if ($scheme !== 'http' && $scheme !== 'https') {
+    // Blocks file://, php://, ftp://, gopher://, dict://, etc.
+    $err = 'Only http and https URLs are allowed';
+    return false;
+  }
+
+  $host = $parts['host'];
+  // Strip IPv6 brackets if present.
+  $host = trim($host, '[]');
+
+  // Resolve the host to its IP address(es) and reject internal ranges.
+  $ips = [];
+  if (filter_var($host, FILTER_VALIDATE_IP)) {
+    $ips[] = $host;
+  } else {
+    $records = @dns_get_record($host, DNS_A + DNS_AAAA);
+    if (is_array($records)) {
+      foreach ($records as $r) {
+        if (!empty($r['ip'])) $ips[] = $r['ip'];
+        if (!empty($r['ipv6'])) $ips[] = $r['ipv6'];
+      }
+    }
+    // Fallback for IPv4 if dns_get_record returned nothing.
+    if (empty($ips)) {
+      $resolved = @gethostbyname($host);
+      if ($resolved && $resolved !== $host) $ips[] = $resolved;
+    }
+  }
+  if (empty($ips)) {
+    $err = 'Unable to resolve host';
+    return false;
+  }
+  foreach ($ips as $ip) {
+    if (!filter_var(
+      $ip,
+      FILTER_VALIDATE_IP,
+      FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+    )) {
+      // Loopback, private (RFC1918), link-local (169.254/16, fe80::),
+      // and other reserved ranges are rejected.
+      $err = 'URL resolves to a disallowed (internal) address';
+      return false;
+    }
+  }
+  return true;
+}
+
 function curl_download($url) {
   global $errormsg;
+
+  $err = '';
+  if (!webcal_validate_remote_url($url, $err)) {
+    $errormsg .= 'Error: ' . $err;
+    return false;
+  }
 
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+  curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+  // Restrict to HTTP(S) so curl cannot be tricked into file://, gopher://, etc.
+  if (defined('CURLPROTO_HTTP')) {
+    curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+    curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+  }
   $result = curl_exec($ch);
   if(curl_errno($ch)) {
     $errormsg .= 'Error: '.curl_error($ch);
@@ -1980,7 +2091,25 @@ function parse_ical ( $cal_file, $source = 'file' ) {
   $importMd5 = '';
   $ical_data = [];
   do_debug ( "in parse_ical, file=$cal_file, source=$source" );
-  if ( $source == 'file' || $source == 'remoteics' ) {
+  if ( $source == 'remoteics' ) {
+    // Remote calendar subscription. The URL is attacker-controlled, so it MUST
+    // be validated and fetched only over HTTP(S) via curl. We deliberately do
+    // NOT use fopen() here: fopen() honors URL wrappers (file://, php://, ...)
+    // and would turn this into an arbitrary local-file-read / SSRF primitive.
+    $urlErr = '';
+    if ( !webcal_validate_remote_url($cal_file, $urlErr) ) {
+      $errormsg .= "Invalid remote calendar URL: $urlErr";
+      return [];
+    }
+    $data = curl_download($cal_file);
+    if (empty($data)) {
+      if (empty($errormsg)) {
+        $errormsg .= "No data returned";
+      }
+      return [];
+    }
+  } else if ( $source == 'file' ) {
+    // Local file path (e.g. an uploaded temp file from import_handler.php).
     $fd = '';
     try {
       $fd = @fopen($cal_file, 'r');
@@ -1989,29 +2118,18 @@ function parse_ical ( $cal_file, $source = 'file' ) {
       $errormsg .= "Cannot read file: $e";
       return [];
     }
-    if (!$fd && stripos($cal_file, "http") == 0) {
-      // Try curl instead so we can ignore cert errors
-      $data = curl_download($cal_file);
-      if (empty($data)) {
-        if (empty($errormsg)) {
-          $errormsg .= "No data returned";
-        }
-        return [];
-      }
-    } else {
-      if (!$fd) {
-        $errormsg .= "Error opening file: $cal_file";
-        return $errormsg;
-      }
-      // Read in contents of entire file first
-      $data = '';
-      $line = 0;
-      while ( ! feof( $fd ) && empty ( $error ) ) {
-        $line++;
-        $data .= fgets( $fd, 4096 );
-      }
-      fclose ( $fd );
+    if (!$fd) {
+      $errormsg .= "Error opening file: $cal_file";
+      return $errormsg;
     }
+    // Read in contents of entire file first
+    $data = '';
+    $line = 0;
+    while ( ! feof( $fd ) && empty ( $error ) ) {
+      $line++;
+      $data .= fgets( $fd, 4096 );
+    }
+    fclose ( $fd );
   } else if ( $source == 'icalclient' ) {
     do_debug ( "before fopen on stdin..." );
     $stdin = fopen ( 'php://input', 'r' );
@@ -2555,7 +2673,7 @@ function format_ical ( $event ) {
   if ( isset ( $event['categories'] ) ) {
     // $fevent['Categories']  will contain an array of cat_id(s) that match the
     // category_names
-    $fevent['Categories'] = get_categories_id_byname ( utf8_decode ( $event['categories'] ) );
+    $fevent['Categories'] = get_categories_id_byname ( $event['categories'] );
   }
   // Start and end time
   /* Snippet from RFC2445
@@ -2620,9 +2738,9 @@ function format_ical ( $event ) {
 
   if ( empty ( $event['summary'] ) )
     $event['summary'] = translate ( 'Unnamed Event' );
-  $fevent['Summary'] = utf8_decode ( $event['summary'] );
+  $fevent['Summary'] = $event['summary'];
   if ( ! empty ( $event['description'] ) ) {
-    $fevent['Description'] = utf8_decode ( $event['description'] );
+    $fevent['Description'] = $event['description'];
   } else {
     $fevent['Description'] = $fevent['Summary'];
   }
@@ -2696,11 +2814,11 @@ function format_ical ( $event ) {
   }
 
   if ( ! empty ( $event['location'] ) ) {
-    $fevent['Location'] = utf8_decode ( $event['location'] );
+    $fevent['Location'] = $event['location'];
   }
 
   if ( ! empty ( $event['url'] ) ) {
-    $fevent['URL'] = utf8_decode ( $event['url'] );
+    $fevent['URL'] = $event['url'];
   }
 
   if ( ! empty ( $event['priority'] ) ) {
