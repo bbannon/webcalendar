@@ -60,6 +60,7 @@ require_once 'includes/config.php';
 require_once 'includes/dbi4php.php';
 require_once 'includes/formvars.php';
 require_once 'includes/functions.php';
+require_once 'includes/mcp-loader.php';
 
 $WebCalendar->initializeFirstPhase();
 
@@ -70,9 +71,6 @@ require_once 'includes/site_extras.php';
 require_once 'includes/validate.php';
 
 $WebCalendar->initializeSecondPhase();
-
-// TODO: Start using composer for dependency management...
-//require_once 'vendor/autoload.php';
 
 // Return the toplevel URL (no path) of the current URL.
 function get_server_top_url () {
@@ -131,12 +129,10 @@ function send_http_headers () {
   //Header("Content-Security-Policy: default-src " . get_server_top_url() .
   //  "; img-src *; style-src *");
 
-  // Set charset to match what is defined in translation file's "charset" definition.
-  $charset = translate('charset');
-  if ($charset == '=') {
-    $charset = 'UTF-8'; // default
-  }
-  header('Content-Type: text/html; charset=' . $charset);
+  // Always use UTF-8 for Content-Type. Many translation files still declare
+  // iso-8859-1 but all database connections now use utf8mb4, so the browser
+  // must interpret the output as UTF-8 to display characters correctly.
+  header('Content-Type: text/html; charset=UTF-8');
 }
 
 /**
@@ -334,12 +330,16 @@ function print_header ( $includes = '', $HeadX = '', $BodyX = '',
 
   $id = preg_replace ( '/.php/', '',
     substr ( $self, strrpos ( $self, '/' ) + 1 ) );
-  $id_ar = explode ( '_', $id );
 
-  // classes and ids are supposed to be UpperCamelCase, per Developer Guide
-  $id = array_map ( 'ucfirst', $id_ar );
+  // Body id mirrors the script name with underscores removed and forced to
+  // lowercase (admin.php -> "admin", view_t.php -> "viewt"). The page-specific
+  // selectors in includes/css/styles.css (#admin, #pref, #day, #viewt, ...) are
+  // lowercase, so this MUST stay lowercase for them to match. (Previously this
+  // used ucfirst() to produce UpperCamelCase ids, which silently disabled all
+  // of that page-specific CSS since CSS id selectors are case-sensitive.)
+  $id = strtolower ( str_replace ( '_', '', $id ) );
 
-  echo implode ( '', $id ) .
+  echo $id .
     ( translate ( 'direction' ) === 'rtl' ? '" dir="rtl"' : '"' )
     // Add any extra parts to the <body> tag.
     . " $BodyX>\n"
@@ -382,6 +382,17 @@ function print_trailer( $include_nav_links = true, $closeDb = true,
   // TODO: Get the submenu working to allow for more dates in the menu.
   if ($MENU_ENABLED != 'N') {
     $ret .= '<script src="./includes/js/menu.js"></script>' . "\n";
+  }
+  // The Month/Week/Year selectors live in the top menu by default. Put them
+  // here instead when the admin asked for that, or when the top menu is
+  // disabled entirely and so has nowhere to hold them. Installs predating the
+  // MENU_DATE_TOP setting have no webcal_config row for it, so default to top.
+  if( $include_nav_links && ! $friendly
+    && ( $MENU_ENABLED == 'N' || ( $MENU_DATE_TOP ?? 'Y' ) == 'N' ) ) {
+    require_once 'date_selectors.php';
+    $ret .= '<nav id="dateselector"'
+     . ' class="navbar navbar-expand-lg navbar-light bg-light">' . "\n"
+     . date_selectors_html() . "</nav>\n";
   }
   if( $include_nav_links && ! $friendly ) {
     if( $MENU_ENABLED == 'N' )
