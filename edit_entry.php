@@ -26,12 +26,13 @@ function time_selection($prefix, $time = '', $trigger = false)
   $amsel = $pmsel = $ret = '';
   $trigger_str = ($trigger ? 'onchange="' . $prefix . 'timechanged() ' : '');
 
-  if (!isset($time) && $time != 0) {
+  if (!isset($time) || $time == 0) {
     $hour = $WORK_DAY_START_HOUR;
     $minute = 0;
   } else {
-    $hour = floor($time / 10000);
-    $minute = (($time / 100) % 100) % 60;
+    $time = (int) $time;
+    $hour = intdiv($time, 10000);
+    $minute = intdiv($time % 10000, 100);
   }
   if ($TIME_FORMAT == '12') {
     $maxhour = 12;
@@ -48,7 +49,8 @@ function time_selection($prefix, $time = '', $trigger = false)
     $hour = sprintf("%02d", $hour);
   }
   $minute = sprintf("%02d", $minute);
-  $ret .= '<select class="form-control col-auto" ' . 'name="' . $prefix . 'hour" id="' . $prefix . 'hour" '
+  $ret .= '<span class="form-inline">'
+    . '<select class="form-control col-auto" ' . 'name="' . $prefix . 'hour" id="' . $prefix . 'hour" '
     . $trigger_str . '>';
   for ($i = 0; $i < $maxhour; $i++) {
     $ihour = ($TIME_FORMAT == '24' ? sprintf("%02d", $i) : $i);
@@ -81,7 +83,8 @@ function time_selection($prefix, $time = '', $trigger = false)
       . $prefix . 'ampmA" value="0" ' . $amsel . '>&nbsp;' . translate('am')
       . '&nbsp;</label><label><input class="form-control" type="radio" name="' . $prefix . 'ampm" id="'
       . $prefix . 'ampmP" value="12" ' . $pmsel . '>&nbsp;' . translate('pm')
-      . '</label>&nbsp;' : '<input type="hidden" name="' . $prefix . 'ampm" value="0">');
+      . '</label>&nbsp;' : '<input type="hidden" name="' . $prefix . 'ampm" value="0">')
+    . '</span>';
 }
 
 $daysStr = translate('days');
@@ -598,7 +601,7 @@ $tabI = 0;
 
         <label for="entry_brief" data-toggle="tooltip" data-placement="top" title="<?php etooltip('brief-description-help'); ?>">
           <?php etranslate('Brief Description'); ?>:</label>
-        <input class="form-control" type="text" name="name" id="entry_brief" size="25" value="<?php echo htmlspecialchars($name); ?>">
+        <input class="form-control" type="text" name="name" id="entry_brief" size="25" maxlength="80" value="<?php echo htmlspecialchars($name); ?>">
         <label for="description" data-toggle="tooltip" data-placement="top" title="<?php etooltip('full-description-help'); ?>">
           <?php etranslate('Full Description'); ?>:</label>
         <textarea class="form-control" rows="5" name="description" id="description"><?php echo htmlspecialchars($description); ?></textarea>
@@ -761,9 +764,9 @@ $tabI = 0;
               &nbsp;(<label for="duration_h"><?php echo $hoursStr; ?></label>: <label for="duration_m"><?php echo $minuteStr; ?></label>)
             </div>
           <?php } else { ?>
-            <div id="timeentryend"><label data-toggle="tooltip" data-placement="top" title="<?php etooltip('end-time-help'); ?>">
-                &nbsp;-&nbsp;
-                <?php echo time_selection('end_', ($id ? add_duration($cal_time, $duration) : $cal_time)); ?>
+            <div class="form-inline" id="timeentryend" style="visibility:hidden;">
+              <label data-toggle="tooltip" data-placement="top" title="<?php etooltip('end-time-help'); ?>">&nbsp;-&nbsp;</label>
+              <?php echo time_selection('end_', ($id ? add_duration($cal_time, $duration) : $cal_time)); ?>
             </div>
           <?php } ?>
 
@@ -1076,7 +1079,7 @@ $tabI = 0;
       <div class="tab-pane container fade" id="' . $tabs_name[$tabI++] . '">
       <table style="padding: 3px;">
         <tr>
-          <td class="align-top">
+          <td class="aligntop">
           <label for="rpttype" data-toggle="tooltip" data-placement="top" title="' . tooltip('repeat-type-help') . '">'
           . translate('Type') . ':</label></td>
           <td colspan="2">
@@ -1252,7 +1255,7 @@ $tabI = 0;
           <td colspan="4"></td>
         </tr>
         <tr id="rptbymonth" style="visibility:hidden;">
-          <td class="align-top">
+          <td class="aligntop">
           <label for="entry_freq" data-toggle="tooltip" data-placement="top" title="' . tooltip('repeat-month-help') . '">'
           . translate('ByMonth') . '</label>:&nbsp;</td>
           <td colspan="2" class="boxall">'
@@ -1395,7 +1398,7 @@ $tabI = 0;
           . 'size="50" maxlength="100" value="' . $byyearday . '"></td>
       </tr>
       <tr id="rptexceptions" style="visibility:visible;">
-        <td><label class="align-top" data-toggle="tooltip" data-placement="top" title="' . tooltip('repeat-exceptions-help') . '">'
+        <td><label class="aligntop" data-toggle="tooltip" data-placement="top" title="' . tooltip('repeat-exceptions-help') . '">'
           . translate('Exclusions') . '/<br>'
           . translate('Inclusions') . ':</label></td>
         <td colspan="2" class="boxtop boxright boxbottom boxleft">
@@ -1605,9 +1608,35 @@ $tabI = 0;
 <br>
 
 
-<?php /* Create a hidden div tag for editing categories... */ ?>
+<?php /* Hidden modal for editing (and ordering) event categories. */ ?>
+<?php
+// Build the set of categories eligible for this editor. Visibility rule
+// mirrors the legacy modal: user's own categories, global categories,
+// admins, and admin-editing-user flow. Consumed by JS in the modal.
+$cat_modal_data = [];
+if (!empty($categories)) {
+  foreach ($categories as $K => $V) {
+    if ($K > 0 && (($V['cat_owner'] == $login || $V['cat_global'] > 0)
+      || $is_admin || substr($form ?? '', 0, 4) == 'edit')) {
+      $cat_modal_data[] = [
+        'id' => (int) $K,
+        'name' => $V['cat_name'],
+        'global' => empty($V['cat_owner']),
+      ];
+    }
+  }
+}
+?>
+<script>
+window.WebCalCategories = <?php
+  echo json_encode(
+    $cat_modal_data,
+    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+  );
+?>;
+</script>
 <div class="modal" id="catModal" tabindex="-1">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title"><?php etranslate("Edit Categories"); ?></h5>
@@ -1616,26 +1645,19 @@ $tabI = 0;
         </button>
       </div>
       <div class="modal-body">
-        <form name="editCatForm" id="editCatForm">
-
-          <?php
-          if (!empty($categories)) {
-            foreach ($categories as $K => $V) {
-              // None is index -1 and needs to be ignored
-              if ($K > 0 && (($V['cat_owner'] == $login || $V['cat_global'] > 0)
-                || $is_admin || substr($form, 0, 4) == 'edit')) {
-                $tmpStr = $K . '">' . $V['cat_name'];
-                echo '<input type="checkbox" name="cat_' . $K . '" ' .
-                  'id="cat_' . $K . '"><label for="cat_' . $K . '">' .
-                  htmlentities($V['cat_name']);
-                if (empty($V['cat_owner']))
-                  echo '<sup>*</sup>';
-                echo "</label><br>\n";
-              }
-            }
-          }
-          ?>
-        </form>
+        <div class="row">
+          <div class="col-sm-6">
+            <label class="font-weight-bold" for="catAvailableList"><?php etranslate('Available categories'); ?>:</label>
+            <ul class="list-group" id="catAvailableList"
+                aria-label="<?php etranslate('Available categories'); ?>"></ul>
+          </div>
+          <div class="col-sm-6">
+            <label class="font-weight-bold" for="catSelectedList"><?php etranslate('Selected categories'); ?>:</label>
+            <ul class="list-group" id="catSelectedList"
+                aria-label="<?php etranslate('Selected categories'); ?>"></ul>
+          </div>
+        </div>
+        <div id="catReorderStatus" aria-live="polite" class="sr-only"></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal"><?php etranslate("Cancel"); ?></button>

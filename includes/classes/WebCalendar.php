@@ -63,10 +63,10 @@ class WebCalendar {
     [
       ['Config', 'PHPDBI', 'Functions'],
       ['User', 'Connect']],
-    '/^(ajax|layers_ajax|events_ajax|users_ajax|autocomplete_ajax|css_cacher|js_cacher|icalclient|freebusy|publish|rss|rss_unapproved|rss_activity_log|get_reminders|get_events|ws)\.php$/' =>
-    [
-      ['Config', 'PHPDBI', 'Functions'],
-      ['User', 'Validate', 'Connect', 'SiteExtras', 'Access']],
+     '/^(ajax|layers_ajax|events_ajax|users_ajax|autocomplete_ajax|css_cacher|js_cacher|icalclient|freebusy|publish|rss|rss_unapproved|rss_activity_log|get_reminders|get_events|ws|mcp)\.php$/' =>
+     [
+       ['Config', 'PHPDBI', 'Functions'],
+       ['User', 'Validate', 'Connect', 'SiteExtras', 'Access']],
     '/^convert_passwords\.php$/' =>
     [
       ['Config', 'PHPDBI'],
@@ -550,6 +550,8 @@ class WebCalendar {
           $session_not_found = true;
       } else {
         session_name(getSessionName());
+        if ( function_exists ( 'harden_php_session' ) )
+          harden_php_session();
         @session_start();
         if ( ! empty ( $_SESSION['webcal_login'] ) )
           $login = $_SESSION['webcal_login'];
@@ -618,6 +620,11 @@ class WebCalendar {
                   ? '' : '?return_path=' . $login_return_path ) );
 
             @session_start();
+            // A persistent (remember-me) cookie just re-established this
+            // session; rotate the session id so a fixed/pre-set id cannot be
+            // carried into the now-authenticated session.
+            if ( session_status() === PHP_SESSION_ACTIVE )
+              session_regenerate_id ( true );
             $_SESSION['webcal_login'] = $login;
             $_SESSION['webcalendar_session'] = $webcalendar_session;
           }
@@ -656,19 +663,24 @@ class WebCalendar {
         doDbSanityCheck();
 
       // Check the current installation version.
-      // Redirect user to install page if it is different from stored value.
-      // This will prevent running WebCalendar until UPGRADING.html has been
-      // read and required upgrade actions completed.
-      $rows = dbi_get_cached_rows ( 'SELECT cal_value FROM webcal_config
+      // Redirect user to the wizard if it is different from stored value.
+      // Read without the query cache -- see the matching note in
+      // includes/config.php for why (issue #639).
+      $rows = [];
+      $res = dbi_execute ( 'SELECT cal_value FROM webcal_config
          WHERE cal_setting = \'WEBCAL_PROGRAM_VERSION\'' );
+      if ( $res ) {
+        while ( $row = dbi_fetch_row ( $res ) ) {
+          $rows[] = $row;
+        }
+        dbi_free_result ( $res );
+      }
       if ( $rows ) {
-              $row = $rows[0];
+        $row = $rows[0];
         if ( $row[0] != $PROGRAM_VERSION ) {
-          // &amp; does not work here...leave it as &
-          header ( 'Location: install/index.php?action=mismatch&version='
-                      . $row[0] );
-        exit;}
-
+          header ( 'Location: wizard/index.php' );
+          exit;
+        }
       }
     }
 
