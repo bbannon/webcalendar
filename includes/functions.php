@@ -614,6 +614,17 @@ function daily_matrix ( $date, $participants, $popup = '' ) {
         <th style="width:{$participant_pct};">
 EOT;
    $ret .= translate ( 'Participants' ) . '</th>';
+  $tentative = translate ( 'Tentative' );
+  $titleStr = ' title="' . translate ( 'Schedule an appointment for XXX.' ) . '">';
+  $viewMsg = translate ( 'View this entry' );
+
+  $hours = $last_hour - $first_hour;
+  $interval = intval ( 60 / $increment );
+  $cell_pct = intval ( 80 / ( $hours * $interval ) );
+  $cols = ( ( $hours * $interval ) + 1 );
+  $style_width = ( $cell_pct > 0 ? 'style="width:' . $cell_pct . '%;"' : '' );
+  $thismonth = date ( 'm', $dateTS );
+  $thisyear = date ( 'Y', $dateTS );
 
   // Build a master array containing all events for $participants.
   for ( $i = 0; $i < $cnt; $i++ ) {
@@ -684,16 +695,10 @@ EOT;
       $inc_x_j = $increment * $j;
       $str .= '
         <td id="C' . ( $j + 1 ) . '" class="dailymatrix" ';
-      $hourStr = sprintf ( $hourfmt, $hour );
-      $minStr = ( $inc_x_j <= 9 ? '0' : '' ) . $inc_x_j;
-      // Translations disagree on this phrase: most split the time into
-      // XXX:YYY (hour:minute), the rest use a single XXX for the whole time.
-      $timeStr = ( strpos ( $titleStr, 'YYY' ) === false
-        ? str_replace ( 'XXX', $hourStr . ':' . $minStr, $titleStr )
-        : str_replace ( ['XXX', 'YYY'], [$hourStr, $minStr], $titleStr ) );
       $tmpTitle = 'onmousedown="schedule_event( ' . $i . ','
        . sprintf ( "%02d", $inc_x_j ) . ' );"' . $MouseOver . $MouseOut
-       . $timeStr;
+       . str_replace ( 'XXX', sprintf ( $hourfmt, $hour ) . ':' .
+          ( $inc_x_j <= 9 ? '0' : '' ) . $inc_x_j, $titleStr );
       switch ( $j ) {
         case $halfway:
           $k = ( $hour <= 9 ? '0' : substr ( $hour, 0, 1 ) );
@@ -3333,30 +3338,6 @@ function get_weekday_before ( $year, $month, $day = 2 ) {
 }
 
 /**
- * Gets the timestamp for the last second of a day.
- *
- * Date ranges handed to {@link read_events()} and
- * {@link read_repeated_events()} are bounded by time of day on the final day:
- *
- * <code>OR ( we.cal_date = $end_date AND we.cal_time <= $end_time )</code>
- *
- * so a range that stops at the last day's midnight silently drops every event
- * on it. Use this for the end of any multi-day range.
- *
- * mktime() handles the day overflow, so $days_after may push past the end of
- * the month, and a range spanning a DST change still ends on the right day.
- *
- * @param int $timestamp   Any time on the starting day.
- * @param int $days_after  Days to advance before taking the end of day.
- *
- * @return int  The last second of that day (in UNIX timestamp format).
- */
-function end_of_day ( $timestamp, $days_after = 0 ) {
-  return mktime ( 23, 59, 59, date ( 'm', $timestamp ),
-    date ( 'd', $timestamp ) + $days_after, date ( 'Y', $timestamp ) );
-}
-
-/**
  * Get the moonphases for a given year and month.
  *
  * Will only work if optional moon_phases.php file exists in includes folder.
@@ -4146,12 +4127,6 @@ function load_global_settings() {
         ? ':' . $SERVER_PORT : '' )
        . substr ( $REQUEST_URI, 0, $ptr + 1 );
 
-      // Clear any existing row first. cal_setting is the primary key, so a
-      // bare INSERT silently fails when the row is present but empty, which
-      // is reachable now that admin.php stores a cleared field as '' rather
-      // than deleting the row (#734).
-      dbi_execute ( 'DELETE FROM webcal_config WHERE cal_setting = ?',
-        ['SERVER_URL'] );
       dbi_execute ( 'INSERT INTO webcal_config ( cal_setting, cal_value )
         VALUES ( ?, ? )', ['SERVER_URL', $SERVER_URL] );
     }
@@ -4161,24 +4136,6 @@ function load_global_settings() {
   if ( empty ( $FONTS ) )
     $FONTS = ( $LANGUAGE == 'Japanese' ? 'Osaka, ' : '' )
      . 'Arial, Helvetica, sans-serif';
-
-  // Any setting with no row in webcal_config is still undefined here. That
-  // used to leave every call site to decide for itself what an undefined
-  // global meant, and they disagreed -- some denied, some allowed (#734).
-  // Fall back to the documented default so a site missing a row behaves the
-  // same as a fresh install, which is what the admin UI already reports.
-  //
-  // Deliberately last: the blocks above derive TIMEZONE, APPLICATION_NAME
-  // and FONTS from the request and the language, and those derived values
-  // have to win over the static defaults. isset() rather than empty() so an
-  // admin's deliberately blank value is not overwritten.
-  if ( ! function_exists ( 'webcal_config_defaults' ) )
-    require_once __DIR__ . '/default_config.php';
-
-  foreach ( webcal_config_defaults() as $setting => $default ) {
-    if ( ! isset ( $GLOBALS[$setting] ) )
-      $GLOBALS[$setting] = $default;
-  }
 }
 
 /**
@@ -4516,44 +4473,28 @@ function load_user_preferences ( $guest = '' ) {
  * @return string The name of the specified month.
  */
 function month_name ( $m, $format = 'F' ) {
-  global $lang;
-  static $local_lang, $month_names, $monthshort_names;
-  //.
+  global $lang, $month_class, $month_names, $monthshort_names;
+  static $local_lang, $month_class, $month_names, $monthshort_names;
+
   // We may have switched languages.
-  if ( $local_lang != $lang )
+  if ( $local_lang !== $lang )
     $month_names = $monthshort_names = [];
 
   $local_lang = $lang;
 
   if ( empty ( $month_names[0] ) || empty ( $monthshort_names[0] ) ) {
-    $month_names = [
-      translate ( 'January' ),
-      translate ( 'February' ),
-      translate ( 'March' ),
-      translate ( 'April' ),
-      translate ( 'May_' ), // needs to be different than "May",
-      translate ( 'June' ),
-      translate ( 'July' ),
-      translate ( 'August' ),
-      translate ( 'September' ),
-      translate ( 'October' ),
-      translate ( 'November' ),
-      translate ( 'December' )];
+    // Not returned from here. Just make sure it's set.
+    // To be used in CSS for background-images for pages / tables.
+    $month_class = ['.JA', '.FE', '.MR', '.AP', '.MA', '.JN',
+                    '.JL', '.AU', '.SE', '.OC', '.NO', '.DE'];
 
-    $monthshort_names = [
-      translate ( 'Jan' ),
-      translate ( 'Feb' ),
-      translate ( 'Mar' ),
-      translate ( 'Apr' ),
-      translate ( 'May' ),
-      translate ( 'Jun' ),
-      translate ( 'Jul' ),
-      translate ( 'Aug' ),
-      translate ( 'Sep' ),
-      translate ( 'Oct' ),
-      translate ( 'Nov' ),
-      translate ( 'Dec' )];
-  }
+    foreach ( ['January', 'February', 'March', 'April',
+        'May_', // needs to be different than "May",
+        'June', 'July', 'August', 'September',
+        'October', 'November', 'December'] as $m ) {
+      $month_names      = array_map ( 'translate', $m );
+      $monthshort_names = array_map ( 'translate', substr ( $m, 0, 3 ) );
+    }
 
   if ( $m >= 0 && $m < 12 )
     return ( $format == 'F' ? $month_names[$m] : $monthshort_names[$m] );
@@ -4588,14 +4529,15 @@ function nonuser_load_variables ( $login, $prefix ) {
     for ( $i = 0, $cnt = count ( $rows ); $i < $cnt; $i++ ) {
       $row = $rows[$i];
       $GLOBALS[$prefix . 'fullname'] = ( strlen ( $row[1] ) || strlen ( $row[2] )
-        ? "$row[2] $row[1]" : $row[0] );
+        ? trim ( "{$row[2]} {$row[1]}" ) : $row[0] );
       $GLOBALS[$prefix . 'login'] = $row[0];
       $GLOBALS[$prefix . 'lastname'] = $row[1];
       $GLOBALS[$prefix . 'firstname'] = $row[2];
-      $GLOBALS[$prefix . 'fullname'] = trim($row[1] . ' ' . $row[2]);
       $GLOBALS[$prefix . 'admin'] = $row[3];
       $GLOBALS[$prefix . 'is_public'] = $row[4];
       $GLOBALS[$prefix . 'url'] = $row[5];
+
+      $GLOBALS[$prefix . 'fullname'] = trim ( {$row[1]} {$row[2]} );
       $GLOBALS[$prefix . 'is_admin'] = false;
       $GLOBALS[$prefix . 'is_nonuser'] = true;
       // We need the email address for the admin.
@@ -6124,7 +6066,7 @@ function validate_domain() {
  * @return string The weekday name ("Sunday" or "Sun")
  */
 function weekday_name ( $w, $format = 'l' ) {
-  global $lang;
+  global $byday_labels, $byday_names, $lang, $week_names, $weekday_names;
   static $local_lang, $week_names, $weekday_names;
 
   // We may have switched languages.
@@ -6141,24 +6083,19 @@ function weekday_name ( $w, $format = 'l' ) {
     $format = 'l';
 
   if ( empty ( $weekday_names[0] ) || empty ( $week_names[0] ) ) {
-    $weekday_names = [
-      translate ( 'Sunday' ),
-      translate ( 'Monday' ),
-      translate ( 'Tuesday' ),
-      translate ( 'Wednesday' ),
-      translate ( 'Thursday' ),
-      translate ( 'Friday' ),
-      translate ( 'Saturday' )];
+    $byday_labels = $sdays = [];
 
-    $week_names = [
-      translate ( 'Sun' ),
-      translate ( 'Mon' ),
-      translate ( 'Tue' ),
-      translate ( 'Wed' ),
-      translate ( 'Thu' ),
-      translate ( 'Fri' ),
-      translate ( 'Sat' )];
-  }
+    $ldays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    foreach ( $ldays as $d ) {
+      // These are not returned from here. Just making sure they're set.
+      $byday_labels[] = strtoupper ( substr ( $d, 0, 2 ) );
+      $sdays[]        = substr ( $d, 0, 3 );
+    }
+
+    $byday_names   = array_map ( 'translate', $byday_names ); // no return
+    $week_names    = array_map ( 'translate', $sdays );
+    $weekday_names = array_map ( 'translate', $ldays );
 
   if ( $w >= 0 && $w < 7 )
     return ( $format == 'l' ? $weekday_names[$w] : $week_names[$w] );
@@ -6317,7 +6254,7 @@ function build_entry_popup ( $popupid, $user, $description, $time,
   $partList = [];
   if ( $details && $id != '' && !
     empty ( $PARTICIPANTS_IN_POPUP ) && $PARTICIPANTS_IN_POPUP == 'Y' && !
-      ( $PUBLIC_ACCESS_VIEW_PART != 'Y' && $login == '__public__' ) ) {
+      ( $PUBLIC_ACCESS_VIEW_PART == 'N' && $login == '__public__' ) ) {
     $rows = dbi_get_cached_rows ( 'SELECT cal_login, cal_status
   FROM webcal_entry_user
   WHERE cal_id = ?
@@ -6666,7 +6603,7 @@ function upgrade_requires_db_changes($db_type, $old_version, $new_version) {
     // Stop after new_version
     if (version_compare($ver, $normalizedNew, '>'))
       break;
-    
+
     // Always return true if we find a version > old_version.
     // This ensures the wizard is triggered for every version bump
     // to update the WEBCAL_PROGRAM_VERSION in the database.
@@ -6911,11 +6848,7 @@ function mcp_list_tools() {
       'description' => 'Get basic information about the authenticated user',
       'inputSchema' => [
         'type' => 'object',
-        // new stdClass(), not []: json_encode turns an empty PHP array into `[]`,
-        // but JSON Schema requires `properties` to be an object. MCP clients that
-        // validate tools/list against the spec reject the whole response over it,
-        // so this one tool made every other tool undiscoverable too.
-        'properties' => new stdClass()
+        'properties' => []
       ]
     ],
     [
