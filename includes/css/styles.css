@@ -7,20 +7,28 @@
  * @package WebCalendar
  */
 
-html {
-  -webkit-box-sizing: border-box;
-          box-sizing: border-box;
-  /* These are to prevent some 'spam site' complaints. */
-  background-color: #FFFFFE;
-  color: #000001;
+:root {
+  /* These 2 are to prevent some 'spam site' complaints. */
+  background-color: light-dark(#fffffe, #000001);
+  color: light-dark(#000001, #fffffe);
+
+  box-sizing: border-box;
+  box-sizing: inherit;
+  color: inherit;
+  color-scheme: light dark;
   hanging-punctuation: first last;
+  interpolate-size: allow-keywords;
+  orphans: 2;
+  scrollbar-gutter: stable both-edges;
+  widows: 2;
 }
-*,
+/* *,
 *::before,
 *::after {
   -webkit-box-sizing: inherit;
           box-sizing: inherit;
 }
+ */
 html,
 body {
   position:relative;
@@ -216,7 +224,7 @@ img {
   background-size: cover;
   */
 
-  shape-margin: 1rem;
+  shape-margin: 1em;
   border: 0;
   vertical-align: middle;
 }

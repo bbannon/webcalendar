@@ -1,0 +1,4291 @@
+/**
+ * @property does for CSS basically what TypeScript does for JavaScript.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@property
+ *
+ * Each item has it's own page, too.
+ * 'accent-color', for example, is;
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/accent-color
+ *
+ * These are set up as the original values,
+ * using the "private" annotation "--_";
+ * The purpose is to apply typing to css variable.
+ * So, you can't assign '1rem' or something to a 'color', for example.
+ */
+@property --_accent-color {
+  syntax: "auto | <color>";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_align-content {
+  syntax: "normal | <baseline-position> | <content-distribution> | <overflow-position>? <content-position>";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_align-items {
+  syntax: "normal | stretch | <baseline-position> | <overflow-position>? <self-position>";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_align-self {
+  syntax: "auto | <overflow-position>? [ normal | <self-position> ] | stretch | <baseline-position> | anchor-center";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_alignment-baseline {
+  syntax: "baseline | <baseline-metric>";
+  initial-value: baseline;
+  inherits: false;
+}
+
+@property --_anchor-name {
+  syntax: "none | <anchor-name>#";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_anchor-scope {
+  syntax: "none | all | <anchor-name>#";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_animation-composition {
+  syntax: "<single-animation-composition>#";
+  initial-value: replace;
+  inherits: false;
+}
+
+@property --_animation-delay {
+  syntax: "[ <animation-delay-start> <animation-delay-end>? ]#";
+  initial-value: 0s;
+  inherits: false;
+}
+
+@property --_animation-direction {
+  syntax: "<single-animation-direction>#";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_animation-duration {
+  syntax: "[ auto | <time [0s,∞]> ]#";
+  initial-value: 0s;
+  inherits: false;
+}
+
+@property --_animation-fill-mode {
+  syntax: "<single-animation-fill-mode>#";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_animation-iteration-count {
+  syntax: "<single-animation-iteration-count>#";
+  initial-value: 1;
+  inherits: false;
+}
+
+@property --_animation-name {
+  syntax: "[ none | <keyframes-name> ]#";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_animation-play-state {
+  syntax: "<single-animation-play-state>#";
+  initial-value: running;
+  inherits: false;
+}
+
+@property --_animation-range-start {
+  syntax: "[ normal | <length-percentage> | <timeline-range-name> <length-percentage>? ]#";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_animation-range-end {
+  syntax: "[ normal | <length-percentage> | <timeline-range-name> <length-percentage>? ]#";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_animation-timeline {
+  syntax: "<single-animation-timeline>#";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_animation-timing-function {
+  syntax: "<easing-function>#";
+  initial-value: ease;
+  inherits: false;
+}
+
+@property --_appearance {
+  syntax: "none | auto | base | base-select | <compat-auto> | <compat-special> | base";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_aspect-ratio {
+  syntax: "auto || <ratio>";
+  initial- value: auto;
+  inherits: false;
+}
+
+@property --_backdrop-filter {
+  syntax: "none | <filter-value-list>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_backface-visibility {
+  syntax: "visible | hidden";
+  initial-value: visible;
+  inherits: false;
+}
+
+@property --_background-attachment {
+  syntax: "<attachment>#";
+  initial-value: scroll;
+  inherits: false;
+}
+
+@property --_background-blend-mode {
+  syntax: "<mix-blend-mode>#";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_background-clip {
+  syntax: "<bg-clip>#";
+  initial-value: border-box;
+  inherits: false;
+}
+
+@property --_background-color {
+  syntax: "<color>";
+  initial-value: transparent;
+  inherits: false;
+}
+
+@property --_background-image {
+  syntax: "<bg-image>#";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_background-origin {
+  syntax: "<visual-box>#";
+  initial-value: padding-box;
+  inherits: false;
+}
+
+@property --_background-position-x {
+  syntax: "[ center | [ [ left | right | x-start | x-end ]? <length-percentage>? ]! ]#";
+  initial-value: 0%;
+  inherits: false;
+}
+
+@property --_background-position-y {
+  syntax: "[ center | [ [ top | bottom | y-start | y-end ]? <length-percentage>? ]! ]#";
+  initial-value: 0%;
+  inherits: false;
+}
+
+@property --_background-repeat-x {
+  syntax: "<repetition>#";
+  initial-value: repeat;
+  inherits: false;
+}
+
+@property --_background-repeat-y {
+  syntax: "<repetition>#";
+  initial-value: repeat;
+  inherits: false;
+}
+
+@property --_background-size {
+  syntax: "<bg-size>#";
+  initial-value: auto auto;
+  inherits: false;
+}
+
+@property --_baseline-shift {
+  syntax: "<length-percentage> | sub | super | top | center | bottom";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_baseline-source {
+  syntax: "auto | first | last";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_block-size {
+  syntax: "<width>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_border-block-end-color {
+  syntax: "<color> | <image-1D>";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_border-block-end-style {
+  syntax: "<line-style>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-block-end-width {
+  syntax: "<line-width>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_border-block-start-color {
+  syntax: "<color> | <image-1D>";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_border-block-start-style {
+  syntax: "<line-style>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-block-start-width {
+  syntax: "<line-width>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_border-collapse {
+  syntax: "separate | collapse";
+  initial-value: separate;
+  inherits: true;
+}
+
+@property --_border-end-end-radius {
+  syntax: "<border-radius>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_border-end-start-radius {
+  syntax: "<border-radius>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_border-image-outset {
+  syntax: "[ <length [0,∞]> | <number [0,∞]> ]{1,4}";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_border-image-repeat {
+  syntax: "[ stretch | repeat | round | space ]{1,2}";
+  initial-value: stretch;
+  inherits: false;
+}
+
+@property --_border-image-slice {
+  syntax: "[ <number [0,∞]> | <percentage [0,∞]> ]{1,4} && fill?";
+  initial-value: 100%;
+  inherits: false;
+}
+
+@property --_border-image-source {
+  syntax: "none | <image>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-image-width {
+  syntax: "[ <length-percentage [0,∞]> | <number [0,∞]> | auto ]{1,4}";
+  initial-value: 1;
+  inherits: false;
+}
+
+@property --_border-inline-end-color {
+  syntax: "<color> | <image-1D>";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_border-inline-end-style {
+  syntax: "<line-style>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-inline-end-width {
+  syntax: "<line-width>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_border-inline-start-color {
+  syntax: "<color> | <image-1D>";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_border-inline-start-style {
+  syntax: "<line-style>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-inline-start-width {
+  syntax: "<line-width>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_border-shape {
+  syntax: "none | [ <basic-shape> <geometry-box>? ]{1,2}";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-spacing {
+  syntax: "<length [0,∞]>{1,2}";
+  initial-value: 0;
+  inherits: true;
+}
+
+@property --_border-start-end-radius {
+  syntax: "<border-radius>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_border-start-start-radius {
+  syntax: "<border-radius>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_box-decoration-break {
+  syntax: "slice | clone";
+  initial-value: slice;
+  inherits: false;
+}
+
+@property --_box-shadow {
+  syntax: "<spread-shadow>#";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_box-sizing {
+  syntax: "content-box | border-box";
+  initial-value: content-box;
+  inherits: false;
+}
+
+@property --_break-after {
+  syntax: "auto | avoid | always | all | avoid-page | page | left | right | recto | verso | avoid-column | column | avoid-region | region";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_break-before {
+  syntax: "auto | avoid | always | all | avoid-page | page | left | right | recto | verso | avoid-column | column | avoid-region | region";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_break-inside {
+  syntax: "auto | avoid | avoid-page | avoid-column | avoid-region";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_caption-side {
+  syntax: "top | bottom";
+  initial-value: top;
+  inherits: true;
+}
+
+@property --_caret-animation {
+  syntax: "auto | manual";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_caret-color {
+  syntax: "auto | <color> [ auto | <color> ]?";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_caret-shape {
+  syntax: "auto | bar | block | underscore";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_clear {
+  syntax: "inline-start | inline-end | block-start | block-end | left | right | top | bottom | both-inline | both-block | both | none";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_clip {
+  syntax: "<rect()> | auto";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_clip-path {
+  syntax: "<clip-source> | [ <basic-shape> || <geometry-box> ] | none";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_clip-rule {
+  syntax: "nonzero | evenodd";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_color {
+  syntax: "<color>";
+  initial-value: canvastext;
+  inherits: true;
+}
+
+@property --_color-interpolation {
+  syntax: "auto | sRGB | linearRGB";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_color-interpolation-filters {
+  syntax: "auto | sRGB | linearRGB";
+  initial-value: linearRGB;
+  inherits: true;
+}
+
+@property --_color-scheme {
+  syntax: "normal | [ light | dark | <custom-ident> ]+ && only?";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_column-count {
+  syntax: "auto | <integer [1,∞]>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_column-fill {
+  syntax: "auto | balance | balance-all";
+  initial-value: balance;
+  inherits: false;
+}
+
+@property --_column-gap {
+  syntax: "normal | <length-percentage [0,∞]> | <line-width>";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_column-height {
+  syntax: "auto | <length [0,∞]>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_column-rule-break {
+  syntax: "none | normal | intersection";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_column-rule-color {
+  syntax: "<line-color-list> | <auto-line-color-list>";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_column-rule-style {
+  syntax: "<line-style-list> | <auto-line-style-list>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_column-rule-visibility-items {
+  syntax: "all | around | between | normal";
+  initial-value: all;
+  inherits: false;
+}
+
+@property --_column-rule-width {
+  syntax: "<line-width-list> | <auto-line-width-list>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_column-span {
+  syntax: "none | <integer [1,∞]> | all | auto";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_column-width {
+  syntax: "auto | <length [0,∞]> | min-content | max-content | fit-content( <length-percentage> )";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_column-wrap {
+  syntax: "auto | nowrap | wrap";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_contain {
+  syntax: "none | strict | content | [ [ size | inline-size ] || layout || style || paint ]";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_contain-intrinsic-block-size {
+  syntax: "auto? [ none | <length [0,∞]> ]";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_contain-intrinsic-height {
+  syntax: "auto? [ none | <length [0,∞]> ]";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_contain-intrinsic-inline-size {
+  syntax: "auto? [ none | <length [0,∞]> ]";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_contain-intrinsic-width {
+  syntax: "auto? [ none | <length [0,∞]> ]";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_container-name {
+  syntax: "none | <custom-ident>+";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_container-type {
+  syntax: "normal | [ [ size | inline-size ] || scroll-state ]";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_content {
+  syntax: "normal | none | [ <content-replacement> | <content-list> ] [ / [ <string> | <counter> | <attr()> ]+ ]? | <element()>";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_content-visibility {
+  syntax: "visible | auto | hidden";
+  initial-value: visible;
+  inherits: false;
+}
+
+@property --_corner-start-start-shape {
+  syntax: "<corner-shape-value>";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-start-end-shape {
+  syntax: "<corner-shape-value>";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-end-end-shape {
+  syntax: "<corner-shape-value>";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-end-start-shape {
+  syntax: "<corner-shape-value>";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_counter-increment {
+  syntax: "[ <counter-name> <integer>? ]+ | none";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_counter-reset {
+  syntax: "[ <counter-name> <integer>? | <reversed-counter-name> <integer>? ]+ | none";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_counter-set {
+  syntax: "[ <counter-name> <integer>? ]+ | none";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_cursor {
+  syntax: "[ <cursor-image> , ]* <cursor-predefined>";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_cx {
+  syntax: "<length-percentage>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_cy {
+  syntax: "<length-percentage>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_d {
+  syntax: "none | <string>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_direction {
+  syntax: "ltr | rtl";
+  initial-value: ltr;
+  inherits: true;
+}
+
+@property --_display {
+  syntax: "[ <display-outside> || <display-inside> ] | <display-listitem> | <display-internal> | <display-box> | <display-legacy> | grid-lanes | inline-grid-lanes | <display-outside> || [ <display-inside> | math ]";
+  initial-value: inline;
+  inherits: false;
+}
+
+@property --_dominant-baseline {
+  syntax: "auto | <baseline-metric>";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_dynamic-range-limit {
+  syntax: "standard | no-limit | constrained | <dynamic-range-limit-mix()>";
+  initial-value: no-limit;
+  inherits: true;
+}
+
+@property --_empty-cells {
+  syntax: "show | hide";
+  initial-value: show;
+  inherits: true;
+}
+
+@property --_field-sizing {
+  syntax: "fixed | content";
+  initial-value: fixed;
+  inherits: false;
+}
+
+@property --_fill {
+  syntax: "<paint>";
+  initial-value: black;
+  inherits: true;
+}
+
+@property --_fill-opacity {
+  syntax: "<opacity>";
+  initial-value: 1;
+  inherits: true;
+}
+
+@property --_fill-rule {
+  syntax: "nonzero | evenodd";
+  initial-value: nonzero;
+  inherits: true;
+}
+
+@property --_filter {
+  syntax: "none | <filter-value-list>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_flex-basis {
+  syntax: "content | <width>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_flex-direction {
+  syntax: "row | row-reverse | column | column-reverse";
+  initial-value: row;
+  inherits: false;
+}
+
+@property --_flex-grow {
+  syntax: "<number [0,∞]>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_flex-line-count {
+  syntax: "<integer [1,∞]>";
+  initial-value: 1;
+  inherits: false;
+}
+
+@property --_flex-shrink {
+  syntax: "<number [0,∞]>";
+  initial-value: 1;
+  inherits: false;
+}
+
+@property --_flex-wrap {
+  syntax: "nowrap | [ wrap | wrap-reverse ] || balance";
+  initial-value: nowrap;
+  inherits: false;
+}
+
+@property --_float {
+  syntax: "block-start | block-end | inline-start | inline-end | snap-block | <snap-block()> | snap-inline | <snap-inline()> | left | right | top | bottom | none | footnote";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_flood-color {
+  syntax: "<color>";
+  initial-value: black;
+  inherits: false;
+}
+
+@property --_flood-opacity {
+  syntax: "<opacity>";
+  initial-value: black;
+  inherits: false;
+}
+
+@property --_font-family {
+  syntax: "[ <font-family-name> | <generic-font-family> ]#";
+  initial-value: sans-serif;
+  inherits: true;
+}
+
+@property --_font-feature-settings {
+  syntax: "normal | <feature-tag-value>#";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-kerning {
+  syntax: "auto | normal | none";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_font-language-override {
+  syntax: "normal | <string>";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-optical-sizing {
+  syntax: "auto | none";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_font-palette {
+  syntax: "normal | light | dark | <palette-identifier> | <palette-mix()>";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-size {
+  syntax: "<absolute-size> | <relative-size> | <length-percentage [0,∞]> | math";
+  initial-value: medium;
+  inherits: true;
+}
+
+@property --_font-size-adjust {
+  syntax: "none | [ ex-height | cap-height | ch-width | ic-width | ic-height ]? [ from-font | <number [0,∞]> ]";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_font-smooth {
+  syntax: "auto | never | always | <absolute-size> | <length>";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_font-stretch {
+  syntax: "normal | <percentage [0,∞]> | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-style {
+  syntax: "normal | italic | left | right | oblique <angle [-90deg,90deg]>?";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-synthesis {
+  syntax: "none | [ weight || style || small-caps || position ]";
+  initial-value: weight style small-caps position;
+  inherits: true;
+}
+
+@property --_font-synthesis-position {
+  syntax: "auto | none";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_font-synthesis-small-caps {
+  syntax: "auto | none";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_font-synthesis-style {
+  syntax: "auto | none | oblique-only";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_font-synthesis-weight {
+  syntax: "auto | none";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_font-variant {
+  syntax: "normal | none | [ [ <common-lig-values> || <discretionary-lig-values> || <historical-lig-values> || <contextual-alt-values> ] || [ small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps ] || [ stylistic( <font-feature-value-name> ) || historical-forms || styleset( <font-feature-value-name># ) || character-variant( <font-feature-value-name># ) || swash( <font-feature-value-name> ) || ornaments( <font-feature-value-name> ) || annotation( <font-feature-value-name> ) ] || [ <numeric-figure-values> || <numeric-spacing-values> || <numeric-fraction-values> || ordinal || slashed-zero ] || [ <east-asian-variant-values> || <east-asian-width-values> || ruby ] || [ sub | super ] || [ text | emoji | unicode ] ]";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-variant-alternates {
+  syntax: "normal | [ stylistic( <font-feature-value-name> ) || historical-forms || styleset( <font-feature-value-name># ) || character-variant( <font-feature-value-name># ) || swash( <font-feature-value-name> ) || ornaments( <font-feature-value-name> ) || annotation( <font-feature-value-name> ) ]";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-variant-caps {
+  syntax: "normal | small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-variant-east-asian {
+  syntax: "normal | [ <east-asian-variant-values> || <east-asian-width-values> || ruby ]";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-variant-emoji {
+  syntax: "normal | text | emoji | Unicode";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-variant-ligatures {
+  syntax: "normal | none | [ <common-lig-values> || <discretionary-lig-values> || <historical-lig-values> || <contextual-alt-values> ]";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-variant-numeric {
+  syntax: "normal | [ <numeric-figure-values> || <numeric-spacing-values> || <numeric-fraction-values> || ordinal || slashed-zero ]";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-variant-position {
+  syntax: "normal | sub | super";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-variant-settings {
+  syntax: "normal | [ <opentype-tag> <number> ]#";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-weight {
+  syntax: "<font-weight-absolute> | bolder | lighter";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_font-width {
+  syntax: "normal | <percentage [0,∞]> | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_forced-color-adjust {
+  syntax: "auto | none | preserve-parent-color";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_frame-sizing {
+  syntax: "auto | content-width | content-height | content-block-size | content-inline-size";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_grid-auto-columns {
+  syntax: "<track-size>+";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_grid-auto-flow {
+  syntax: "[ row | column ] || dense";
+  initial-value: row;
+  inherits: false;
+}
+
+@property --_grid-auto-rows {
+  syntax: "<track-size>+";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_grid-column-end {
+  syntax: "<grid-line>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_grid-column-start {
+  syntax: "<grid-line>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_grid-row-end {
+  syntax: "<grid-line>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_grid-row-start {
+  syntax: "<grid-line>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_grid-template-areas {
+  syntax: "none | <string>+";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_grid-template-columns {
+  syntax: "none | <track-list> | <auto-track-list> | subgrid <line-name-list>?";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_grid-template-rows {
+  syntax: "none | <track-list> | <auto-track-list> | subgrid <line-name-list>?";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_hanging-punctuation {
+  syntax: "none | [ first || [ force-end | allow-end ] || last ]";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_hyphenate-character {
+  syntax: "auto | <string>";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_hyphenate-limit-chars {
+  syntax: "[ auto | <integer> ]{1,3}";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_hyphens {
+  syntax: "none | manual | auto";
+  initial-value: manual;
+  inherits: true;
+}
+
+@property --_image-orientation {
+  syntax: "from-image | none | [ <angle> || flip ]";
+  initial-value: from-image;
+  inherits: true;
+}
+
+@property --_image-rendering {
+  syntax: "auto | smooth | high-quality | pixelated | crisp-edges";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_image-resolution {
+  syntax: "[ from-image || <resolution> ] && snap?";
+  initial-value: 1dppx;
+  inherits: true;
+}
+
+@property --_initial-letter {
+  syntax: "normal | <number [1,∞]> <integer [1,∞]> | <number [1,∞]> && [ drop | raise ]?";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_inline-size {
+  syntax: "<width>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_inset-block-end {
+  syntax: "auto | <length-percentage>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_inset-block-start {
+  syntax: "auto | <length-percentage>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_inset-inline {
+  syntax: "<'top'>{1,2}";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_inset-inline-end {
+  syntax: "auto | <length-percentage>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_inset-inline-start {
+  syntax: "auto | <length-percentage>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_interactivity {
+  syntax: "auto | inert";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_interest-delay-end {
+  syntax: "normal | <time>";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_interest-delay-start {
+  syntax: "normal | <time>";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_interpolate-size {
+  syntax: "numeric-only | allow-keywords";
+  initial-value: numeric-only;
+  inherits: true;
+}
+
+@property --_isolation {
+  syntax: "<isolation-mode>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_justify-content {
+  syntax: "normal | <content-distribution> | <overflow-position>? [ <content-position> | left | right ]";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_justify-items {
+  syntax: "normal | stretch | <baseline-position> | <overflow-position>? [ <self-position> | left | right ] | legacy | legacy && [ left | right | center ]";
+  initial-value: legacy;
+  inherits: false;
+}
+
+@property --_justify-self {
+  syntax: "auto | <overflow-position>? [ normal | <self-position> | left | right ] | stretch | <baseline-position> | anchor-center";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_letter-spacing {
+  syntax: "normal | <length-percentage>";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_lighting-color {
+  syntax: "<color>";
+  initial-value: white;
+  inherits: false;
+}
+
+@property --_line-break {
+  syntax: "auto | loose | normal | strict | anywhere";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_line-clamp {
+  syntax: "none | [ <integer [1,∞]> || <block-ellipsis> ] -webkit-legacy?";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_line-height {
+  syntax: "normal | <number [0,∞]> | <length-percentage [0,∞]>";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_line-height-step {
+  syntax: "<length [0,∞]>";
+  initial-value: 0;
+  inherits: true;
+}
+
+@property --_list-style-image {
+  syntax: "<image> | none";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_list-style-position {
+  syntax: "inside | outside";
+  initial-value: outside;
+  inherits: true;
+}
+
+@property --_list-style-type {
+  syntax: "<counter-style> | <string> | none";
+  initial-value: disc;
+  inherits: true;
+}
+
+@property --_margin-block-end {
+  syntax: "<margin-top>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_margin-block-start {
+  syntax: "<margin-top>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_margin-inline-end {
+  syntax: "<margin-top>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_margin-inline-start {
+  syntax: "<margin-top>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_margin-trim {
+  syntax: "none | block | [ block-start || block-end ]";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_marker-end {
+  syntax: "none | <marker-ref>";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_marker-mid {
+  syntax: "none | <marker-ref>";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_marker-start {
+  syntax: "none | <marker-ref>";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_mask-border-mode {
+  syntax: "luminance | alpha";
+  initial-value: alpha;
+  inherits: false;
+}
+
+@property --_mask-border-outset {
+  syntax: "<border-image-outset>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_mask-border-repeat {
+  syntax: "<border-image-repeat>";
+  initial-value: stretch;
+  inherits: false;
+}
+
+@property --_mask-border-slice {
+  syntax: "<border-image-slice>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_mask-border-source {
+  syntax: "<border-image-source>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_mask-border-width {
+  syntax: "<border-image-width>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_mask-clip {
+  syntax: "[ <coord-box> | no-clip ]#";
+  initial-value: border-box;
+  inherits: false;
+}
+
+@property --_mask-composite {
+  syntax: "<compositing-operator>#";
+  initial-value: add;
+  inherits: false;
+}
+
+@property --_mask-image {
+  syntax: "<mask-reference>#";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_mask-mode {
+  syntax: "<masking-mode>#";
+  initial-value: match-source;
+  inherits: false;
+}
+
+@property --_mask-origin {
+  syntax: "<coord-box>#";
+  initial-value: border-box;
+  inherits: false;
+}
+
+@property --_mask-position {
+  syntax: "<position>#";
+  initial-value: 0% 0%;
+  inherits: false;
+}
+
+@property --_mask-repeat {
+  syntax: "<repeat-style>#";
+  initial-value: 0% 0%;
+  inherits: false;
+}
+
+@property --_mask-size {
+  syntax: "<bg-size";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_mask-type {
+  syntax: "luminance | alpha";
+  initial-value: luminance;
+  inherits: false;
+}
+
+@property --_math-depth {
+  syntax: "auto-add | add(  <integer> ) | <integer>";
+  initial-value: 0;
+  inherits: true;
+}
+
+@property --_math-shift {
+  syntax: "normal | compact";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_math-style {
+  syntax: "normal | compact";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_max-block-size {
+  syntax: "<max-width>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_max-height {
+  syntax: "none | <length-percentage [0,∞]> | min-content | max-content | fit-content( <length-percentage [0,∞]> ) | <calc-size()> | <anchor-size()> | stretch | fit-content | contain";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_max-inline-size {
+  syntax: "<max-width>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_max-width {
+  syntax: "none | <length-percentage [0,∞]> | min-content | max-content | fit-content( <length-percentage [0,∞]> ) | <calc-size()> | <anchor-size()> | stretch | fit-content | contain";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_min-block-size {
+  syntax: "<min-width>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_min-height {
+  syntax: "auto | <length-percentage [0,∞]> | min-content | max-content | fit-content( <length-percentage [0,∞]> ) | <calc-size()> | <anchor-size()> | stretch | fit-content | contain";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_min-inline-size {
+  syntax: "<min-width>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_min-width {
+  syntax: "auto | <length-percentage [0,∞]> | min-content | max-content | fit-content( <length-percentage [0,∞]> ) | <calc-size()> | <anchor-size()> | stretch | fit-content | contain";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_mix-blend-mode {
+  syntax: "<blend-mode> | plus-lighter";
+  initial-value: normal;
+  inherits: false
+}
+
+@property --_object-fit {
+  syntax: "fill | none | [ contain | cover ] || scale-down";
+  initial-value: fill;
+  inherits: false;
+}
+
+@property --_object-position {
+  syntax: "<position>";
+  initial-value: 50% 50%;
+  inherits: false;
+}
+
+@property --_object-view-box {
+  syntax: "none | <basic-shape-rect>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_offset-anchor {
+  syntax: "auto | <position>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_offset-distance {
+  syntax: "<length-percentage>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_offset-path {
+  syntax: "none | <offset-path> || <coord-box>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_offset-position {
+  syntax: "normal | auto | <position>";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_offset-rotate {
+  syntax: "[ auto | reverse ] || <angle>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_opacity {
+  syntax: "<opacity-value>";
+  initial-value: 1;
+  inherits: false;
+}
+
+@property --_order {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_orphans {
+  syntax: "<integer [1,∞]>";
+  initial-value: 2;
+  inherits: true;
+}
+
+@property --_outline-color {
+  syntax: "auto | <border-top-color>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_outline-offset {
+  syntax: "<length>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_outline-style {
+  syntax: "auto | <outline-line-style>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_outline-width {
+  syntax: "<line-width>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_overflow {
+  syntax: "<overflow-block>{1,2}";
+  initial-value: visible;
+  inherits: false;
+}
+
+@property --_overflow-anchor {
+  syntax: "auto | none";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_overflow-block {
+  syntax: "visible | hidden | clip | scroll | auto";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_overflow-clip-margin {
+  syntax: "<visual-box> || <length>";
+  initial-value: 0px;
+  inherits: false;
+}
+
+@property --_overflow-inline {
+  syntax: "visible | hidden | clip | scroll | auto";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_overflow-wrap {
+  syntax: "normal | break-word | anywhere";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_overflow-x {
+  syntax: "visible | hidden | clip | scroll | auto";
+  initial-value: visible;
+  inherits: false;
+}
+
+@property --_overflow-y {
+  syntax: "<overflow-block>";
+  initial-value: visible;
+  inherits: false;
+}
+
+@property --_overlay {
+  syntax: "none | auto";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_overscroll-behavior-block {
+  syntax: "contain | none | auto | chain";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_overscroll-behavior-inline {
+  syntax: "contain | none | auto | chain";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_overscroll-behavior-x {
+  syntax: "contain | none | auto | chain";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_overscroll-behavior-y {
+  syntax: "contain | none | auto | chain";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_padding-block-end {
+  syntax: "<padding-top>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_padding-block-start {
+  syntax: "<padding-top>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_padding-bottom {
+  syntax: "<length-percentage [0,∞]>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_padding-inline-end {
+  syntax: "<padding-top>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_padding-inline-start {
+  syntax: "<padding-top>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_padding-left {
+  syntax: "<length-percentage [0,∞]>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_padding-right {
+  syntax: "<length-percentage [0,∞]>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_padding-top {
+  syntax: "<length-percentage [0,∞]>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_page {
+  syntax: "auto | <custom-ident>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_paint-order {
+  syntax: "normal | [ fill || stroke || markers ]";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_path-length {
+  syntax: "none | <length> [0,∞]";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_perspective {
+  syntax: "none | <length [0,∞]>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_perspective-origin {
+  syntax: "position>";
+  initial-value: 50% 50%;
+  inherits: false;
+}
+
+@property --_pointer-events {
+  syntax: "auto | bounding-box | visiblePainted | visibleFill | visibleStroke | visible | painted | fill | stroke | all | none";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_position {
+  syntax: "static | relative | absolute | sticky | fixed | <running()>";
+  initial-value: static;
+  inherits: false;
+}
+
+@property --_position-anchor {
+  syntax: "normal | none | auto | <anchor-name> | match-parent";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_position-area {
+  syntax: "none | <position-area>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_position-try-fallbacks {
+  syntax: "none | [ [ <dashed-ident> || <try-tactic> ] | <position-area> ]#";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_position-try-order {
+  syntax: "normal | <try-size>";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_position-visibility {
+  syntax: "always | [ anchor-valid || anchor-visible || no-overflow ]";
+  initial-value: anchors-visible;
+  inherits: false;
+}
+
+@property --_print-color-adjust {
+  syntax: "economy | exact";
+  initial-value: economy;
+  inherits: true;
+}
+
+@property --_quotes {
+  syntax: "auto | none | match-parent | [ <string> <string> ]+";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_r {
+  syntax: "<length-percentage>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_reading-flow {
+  syntax: "normal | flex-visual | flex-flow | grid-columns | grid-rows | grid-order | source-order";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_reading-order {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_resize {
+  syntax: "none | both | horizontal | vertical | block | inline";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_rotate {
+  syntax: "none | <angle> | [ x | y | z | <number>{3} ] && <angle>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_row-gap {
+  syntax: "normal | <length-percentage [0,∞]> | <line-width>";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_row-rule-break {
+  syntax: "none | normal | intersection";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_row-rule-color {
+  syntax: "<line-color-list> | <auto-line-color-list>";
+  initial-value: transparent;
+  inherits: false;
+}
+
+@property --_row-rule-style {
+  syntax: "<line-style-list> | <auto-line-style-list>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_row-rule-visibility-items {
+  syntax: "all | around | between | normal";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_row-rule-width {
+  syntax: "<line-width-list> | <auto-line-width-list>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_ruby-align {
+  syntax: "start | center | space-between | space-around";
+  initial-value: space-around;
+  inherits: true;
+}
+
+@property --_ruby-overhang {
+  syntax: "auto | spaces";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_ruby-position {
+  syntax: "[ alternate || [ over | under ] ] | inter-character";
+  initial-value: alternate;
+  inherits: true;
+}
+
+@property --_rule {
+  syntax: "<column-rule>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_rule-break {
+  syntax: "<'column-rule-break'>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_rule-color {
+  syntax: "<'column-rule-color'>";
+  initial-value: transparent;
+  inherits: false;
+}
+
+@property --_rule-style {
+  syntax: "<'column-rule-style'>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_rule-visibility-items {
+  syntax: "<column-rule-visibility-items>";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_rule-width {
+  syntax: "<'column-rule-width'>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_rx {
+  syntax: "<length-percentage> | auto";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_ry {
+  syntax: "<length-percentage> | auto";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scale {
+  syntax: "none | [ <number> | <percentage> ]{1,3}";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_scroll-behavior {
+  syntax: "auto | smooth";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scroll-initial-target {
+  syntax: "none | nearest";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_scroll-margin-block-end {
+  syntax: "<length>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_scroll-margin-block-start {
+  syntax: "<length>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_scroll-margin-bottom {
+  syntax: "<length>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_scroll-margin-inline-end {
+  syntax: "<length>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_scroll-margin-inline-start {
+  syntax: "<length>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_scroll-margin-left {
+  syntax: "<length>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_scroll-margin-right {
+  syntax: "<length>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_scroll-margin-top {
+  syntax: "<length>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_scroll-marker-group {
+  syntax: "none | [ [ before | after ] || [ links | tabs ] ]";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_scroll-padding-block-end {
+  syntax: "[ auto | <length-percentage [0,∞]> ]";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scroll-padding-block-start {
+  syntax: "[ auto | <length-percentage [0,∞]> ]";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scroll-padding-bottom {
+  syntax: "[ auto | <length-percentage [0,∞]> ]";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scroll-padding-inline-end {
+  syntax: "[ auto | <length-percentage [0,∞]> ]";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scroll-padding-inline-start {
+  syntax: "[ auto | <length-percentage [0,∞]> ]";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scroll-padding-left {
+  syntax: "[ auto | <length-percentage [0,∞]> ]";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scroll-padding-right {
+  syntax: "[ auto | <length-percentage [0,∞]> ]";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scroll-padding-top {
+  syntax: "[ auto | <length-percentage [0,∞]> ]";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scroll-snap-align {
+  syntax: "[ none | start | end | center ]{1,2}";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_scroll-snap-stop {
+  syntax: "normal | always";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_scroll-snap-type {
+  syntax: "none | [ x | y | block | inline | both ] [ mandatory | proximity ]?";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_scroll-target-group {
+  syntax: "none | auto";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_scroll-timeline-axis {
+  syntax: "[ block | inline | x | y ]#";
+  initial-value: block;
+  inherits: false;
+}
+
+@property --_scroll-timeline-name {
+  syntax: "[ none | <dashed-ident> ]#";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_scrollbar-color {
+  syntax: "auto | <color>{2}";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_scrollbar-gutter {
+  syntax: "auto | stable && both-edges?";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scrollbar-width {
+  syntax: "auto | thin | none";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_shape-image-threshold {
+  syntax: "<opacity-value>";
+  initial-value: 0.0;
+  inherits: false;
+}
+
+@property --_shape-margin {
+  syntax: "<length-percentage [0,∞]>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_shape-outside {
+  syntax: "none | [ <basic-shape> || <shape-box> ] | <image>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_shape-rendering {
+  syntax: "auto | optimizeSpeed | crispEdges | geometricPrecision";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_speak-as {
+  syntax: "normal | spell-out || digits || [ literal-punctuation | no-punctuation ]";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_stop-color {
+  syntax: "<color>";
+  initial-value: black;
+  inherits: false;
+}
+
+@property --_stop-opacity {
+  syntax: "<number> | <percentage>";
+  initial-value: black;
+  inherits: false;
+}
+
+@property --_stroke-dasharray {
+  syntax: "none | [ <length-percentage> | <number> ]+#";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_stroke-dashoffset {
+  syntax: "<length-percentage> | <number>";
+  initial-value: 0;
+  inherits: true;
+}
+
+@property --_stroke-linecap {
+  syntax: "butt | round | square";
+  initial-value: butt;
+  inherits: true;
+}
+
+@property --_stroke-linejoin {
+  syntax: "[ crop | arcs | miter ] || [ bevel | round | fallback ]";
+  initial-value: miter;
+  inherits: true;
+}
+
+@property --_stroke-miterlimit {
+  syntax: "<number>";
+  initial-value: 4;
+  inherits: true;
+}
+
+@property --_stroke-opacity {
+  syntax: "<opacity>";
+  initial-value: 1;
+  inherits: true;
+}
+
+@property --_stroke-width {
+  syntax: "[ <length-percentage> | <line-width> | <number> ]#";
+  initial-value: 1px;
+  inherits: true;
+}
+
+@property --_tab-size {
+  syntax: "<number [0,∞]> | <length [0,∞]>";
+  initial-value: 8;
+  inherits: true;
+}
+
+@property --_table-layout {
+  syntax: "auto | fixed";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_text-align {
+  syntax: "start | end | left | right | center | <string> | justify | match-parent | justify-all";
+  initial-value: start;
+  inherits: true;
+}
+
+@property --_text-align-last {
+  syntax: "auto | start | end | left | right | center | justify | match-parent";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_text-anchor {
+  syntax: "start | middle | end";
+  initial-value: start;
+  inherits: true;
+}
+
+@property --_text-autospace {
+  syntax: "normal | <autospace> | auto";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_text-box-edge {
+  syntax: "auto | <text-edge>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_text-box-trim {
+  syntax: "none | trim-start | trim-end | trim-both";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_text-combine-upright {
+  syntax: "none | all | [ digits <integer [2,4]>? ]";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_text-decoration-color {
+  syntax: "<color>";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_text-decoration-inset {
+  syntax: "<length>{1,2} | auto";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_text-decoration-line {
+  syntax: "none | [ underline || overline || line-through || blink ] | spelling-error | grammar-error";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_text-decoration-skip-ink {
+  syntax: "auto | none | all";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_text-decoration-style {
+  syntax: "solid | double | dotted | dashed | wavy";
+  initial-value: solid;
+  inherits: false;
+}
+
+@property --_text-decoration-thickness {
+  syntax: "auto | from-font | <length-percentage> | <line-width>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_text-emphasis-color {
+  syntax: "<color>";
+  initial-value: currentcolor;
+  inherits: true;
+}
+
+@property --_text-emphasis-position {
+  syntax: "[ over | under ] && [ right | left ]?";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_text-emphasis-style {
+  syntax: "none | [ [ filled | open ] || [ dot | circle | double-circle | triangle | sesame ] ] | <string>";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_text-indent {
+  syntax: "[ <length-percentage> ] && hanging? && each-line?";
+  initial-value: 0;
+  inherits: true;
+}
+
+@property --_text-justify {
+  syntax: "[ auto | none | inter-word | inter-character | ruby ] || no-compress";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_text-orientation {
+  syntax: "mixed | upright | sideways";
+  initial-value: mixed;
+  inherits: true;
+}
+
+@property --_text-overflow {
+  syntax: "[ clip | ellipsis | <string> | fade | <fade()> ]{1,2}";
+  initial-value: clip;
+  inherits: false;
+}
+
+@property --_text-rendering {
+  syntax: "auto | optimizeSpeed | optimizeLegibility | geometricPrecision";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_text-shadow {
+  syntax: "none | <shadow>#";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_text-size-adjust {
+  syntax: "auto | none | <percentage [0,∞]>";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_text-spacing-trim {
+  syntax: "<spacing-trim> | auto";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_text-transform {
+  syntax: "none | [ capitalize | uppercase | lowercase ] || full-width || full-size-kana | math-auto";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_text-underline-offset {
+  syntax: "auto | <length-percentage>";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_text-underline-position {
+  syntax: "auto | [ from-font | under ] || [ left | right ]";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_text-wrap-mode {
+  syntax: "wrap | nowrap";
+  initial-value: wrap;
+  inherits: true;
+}
+
+@property --_text-wrap-style {
+  syntax: "auto | balance | stable | pretty | avoid-short-last-line";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_timeline-scope {
+  syntax: "none | all | <dashed-ident>#";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_touch-action {
+  syntax: "auto | none | [ [ pan-x | pan-left | pan-right ] || [ pan-y | pan-up | pan-down ] || pinch-zoom ] | manipulation";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_transform {
+  syntax: "none | <transform-list>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_transform-box {
+  syntax: "content-box | border-box | fill-box | stroke-box | view-box";
+  initial-value: view-box;
+  inherits: false;
+}
+
+@property --_transform-origin {
+  syntax: "[ left | center | right | top | bottom | <length-percentage> ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ] <length>? | [ [ center | left | right ] && [ center | top | bottom ] ] <length>?";
+  initial-value: 50% 50% 0;
+  inherits: false;
+}
+
+@property --_transform-style {
+  syntax: "flat | preserve-3d";
+  initial-value: flat;
+  inherits: false;
+}
+
+@property --_transition-behavior {
+  syntax: "<transition-behavior-value>#";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_transition-delay {
+  syntax: "<time>#";
+  initial-value: 0s;
+  inherits: false;
+}
+
+@property --_transition-duration {
+  syntax: "<time [0s,∞]>#";
+  initial-value: 0s;
+  inherits: false;
+}
+
+@property --_transition-property {
+  syntax: "none | <single-transition-property>#";
+  initial-value: all;
+  inherits: false;
+}
+
+@property --_transition-timing-function {
+  syntax: "<easing-function>#";
+  initial-value: ease;
+  inherits: false;
+}
+
+@property --_translate {
+  syntax: "none | <length-percentage> [ <length-percentage> <length>? ]?";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_unicode-bidi {
+  syntax: "normal | embed | isolate | bidi-override | isolate-override | plaintext";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_user-select {
+  syntax: "auto | text | none | contain | all";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_vector-effect {
+  syntax: "none | non-scaling-stroke | non-scaling-size | non-rotation | fixed-position";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_view-timeline-axis {
+  syntax: "[ block | inline | x | y ]#";
+  initial-value: block;
+  inherits: false;
+}
+
+@property --_view-timeline-inset {
+  syntax: "[ [ auto | <length-percentage> ]{1,2} ]#";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_view-timeline-name {
+  syntax: "[ none | <dashed-ident> ]#";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_view-transition-class {
+  syntax: "none | <custom-ident>+";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_view-transition-name {
+  syntax: "none | all";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_view-transition-scope {
+  syntax: "none | all";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_visibility {
+  syntax: "visible | hidden | force-hidden | collapse";
+  initial-value: visible;
+  inherits: true;
+}
+
+@property --_white-space-collapse {
+  syntax: "collapse | discard | preserve | preserve-breaks | preserve-spaces | break-spaces";
+  initial-value: collapse;
+  inherits: true;
+}
+
+@property --_widows {
+  syntax: "<integer [1,∞]>";
+  initial-value: 2;
+  inherits: true;
+}
+
+@property --_will-change {
+  syntax: "auto | <animateable-feature>#";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_word-break {
+  syntax: "normal | break-all | keep-all | manual | auto-phrase | break-word";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_word-spacing {
+  syntax: "normal | <length-percentage>";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_writing-mode {
+  syntax: "horizontal-tb | vertical-rl | vertical-lr | sideways-rl | sideways-lr";
+  initial-value: horizontal-tb;
+  inherits: true;
+}
+
+@property --_x {
+  syntax: "<length-percentage>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_y {
+  syntax: "<length-percentage>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_z-index {
+  syntax: "auto | <integer> | inherit";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_zoom {
+  syntax: "<number [0,∞]> | <percentage [0,∞]>";
+  initial-value: 1;
+  inherits: false;
+}
+
+
+
+
+@property --_animation {
+  /* shorthand for;
+   *   animation-name: none;
+   *   animation-duration: 0s;
+   *   animation-timing-function: ease;
+   *   animation-delay: 0s;
+   *   animation-iteration-count: 1;
+   *   animation-direction: normal;
+   *   animation-fill-mode: none;
+   *   animation-play-state: running;
+   *   animation-timeline: auto;
+   */
+  syntax: "<single-animation>#";
+  initial-value: none 0s ease 0s 1 normal none running auto;
+  inherits: false;
+}
+
+@property --_animation-range {
+  /* shorthand for;
+   *   animation-range-start: normal;
+   *   animation-range-end: normal;
+   */
+  syntax: "[ <animation-range-start> <animation-range-end>? ]#";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_background {
+  /* shorthand for;
+   *   background-image: none;
+   *   background-position: 0% 0%;
+   *   background-size: auto auto;
+   *   background-repeat: repeat;
+   *   background-origin: padding-box;
+   *   background-clip: border-box;
+   *   background-attachment: scroll;
+   *   background-color: transparent;
+   */
+  syntax: "<bg-layer>#? , <final-bg-layer>";
+  initial-value: none 0% 0% / auto auto repeat padding-box border-box scroll transparent;
+  inherits: false;
+}
+
+@property --_background-position {
+  /* shorthand for;
+   *   background-position-x: 0%;
+   *   background-position-y: 0%;
+   */
+  syntax: "<bg-position>#";
+  initial-value: 0% 0%;
+  inherits: false;
+}
+
+@property --_background-repeat {
+  /* shorthand for;
+   *   background-repeat-x: repeat;
+   *   background-repeat-y: repeat;
+   */
+  syntax: "<repeat-style>#";
+  initial-value: repeat;
+  inherits: false;
+}
+
+@property --_border {
+  /* shorthand for;
+   *   border-width: as each of the properties of the shorthand:
+   *     border-top-width: medium;
+   *     border-inline-width: medium;
+   *     border-block-width: medium;
+   *   border-style: as each of the properties of the shorthand:
+   *     border-top-style: none;
+   *     border-inline-style: none;
+   *     border-block-style: none;
+   *   border-color: as each of the properties of the shorthand:
+   *     border-top-color: currentcolor;
+   *     border-inline-color: currentcolor;
+   *     border-block-color: currentcolor;
+   */
+  syntax: "<line-width> || <line-style> || <color>";
+  initial-value: medium;
+  inherits: no;
+}
+
+@property --_border-block {
+  /* shorthand for;
+   *   border-block-width: as each of the properties of the shorthand;
+   *   border-block-start-width: medium;
+   *   border-block-end-width: medium;
+   *   border-block-style: as each of the properties of the shorthand;
+   *   border-block-start-style: none;
+   *   border-block-end-style: none;
+   *   border-block-color: as each of the properties of the shorthand;
+   *   border-block-start-color: currentcolor;
+   *   border-block-end-color: currentcolor;
+   */
+  syntax: "<border-block-start>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_border-block-color {
+  /* shorthand for;
+   *   border-block-start-color: currentcolor;
+   *   border-block-end-color: currentcolor;
+   */
+  syntax: "<border-top-color>{1,2}";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_border-block-end {
+  /* shorthand for;
+   *   border-block-end-width: medium;
+   *   border-block-end-style: none;
+   *   border-block-end-color: currentcolor;
+   */
+  syntax: "<line-width> || <line-style> || <color>";
+  initial-value: medium none currentcolor;
+  inherits: false;
+}
+
+@property --_border-block-start {
+  /* shorthand for;
+   *   border-block-start-width: medium;
+   *   border-block-start-style: none;
+   *   border-block-start-color: currentcolor;
+   */
+  syntax: "<line-width> || <line-style> || <color>";
+  initial-value: medium none currentcolor;
+  inherits: false;
+}
+
+@property --_border-block-style {
+  /* shorthand for;
+   *   border-block-start-style: none;
+   *   border-block-end-style: none;
+   */
+  syntax: "<border-top-style>{1,2}";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-block-width {
+  /* shorthand for;
+   *   border-block-start-width: medium;
+   *   border-block-end-width: medium;
+   */
+  syntax: "<border-top-width>{1,2}";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_border-bottom {
+  /* shorthand for;
+   *   border-bottom-width: medium;
+   *   border-bottom-style: none;
+   *   border-bottom-color: currentcolor;
+   */
+  syntax: "<line-width> || <line-style> || <color>";
+  initial-value: medium none currentcolor;
+  inherits: false;
+}
+
+@property --_border-image {
+  /* shorthand for;
+   *   border-image-source: none;
+   *   border-image-slice: 100%;
+   *   border-image-width: 1;
+   *   border-image-outset: 0;
+   *   border-image-repeat: stretch;
+   */
+  syntax: "<border-image-source> || <border-image-slice> [ / <border-image-width> | / <border-image-width>? / <border-image-outset> ]? || <border-image-repeat>";
+  initial-value: none 100% 1 0 stretch;
+  inherits: false;
+}
+
+@property --_border-inline {
+  /* shorthand for;
+   *   border-inline-width: as each of the properties of the shorthand;
+   *   border-inline-start-width: medium;
+   *   border-inline-end-width: medium;
+   *   border-inline-style: as each of the properties of the shorthand;
+   *   border-inline-start-style: none;
+   *   border-inline-end-style: none;
+   *   border-inline-color: as each of the properties of the shorthand;
+   *   border-inline-start-color: currentcolor;
+   *   border-inline-end-color: currentcolor;
+   */
+  syntax: "<border-block-start>";
+  initial-value: medium none currentcolor;
+  inherits: false;
+}
+
+@property --_border-inline-color {
+  /* shorthand for;
+   *   border-inline-start-color: currentcolor;
+   *   border-inline-end-color: currentcolor;
+   */
+  syntax: "<border-top-color>{1,2}";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_border-inline-end {
+  /* shorthand for;
+   *   border-inline-end-width: medium;
+   *   border-inline-end-style: none;
+   *   border-inline-end-color: currentcolor;
+   */
+  syntax: "<line-width> || <line-style> || <color>";
+  initial-value: medium none currentcolor;
+  inherits: false;
+}
+
+@property --_border-inline-start {
+  /* shorthand for;
+   *   border-inline-start-width: medium;
+   *   border-inline-start-style: none;
+   *   border-inline-start-color: currentcolor;
+   */
+  syntax: "<line-width> || <line-style> || <color>";
+  initial-value: medium none currentcolor;
+  inherits: false;
+}
+
+@property --_border-inline-style {
+  /* shorthand for;
+   *   border-inline-start-style: none;
+   *   border-inline-end-style: none;
+   */
+  syntax: "<border-top-style>{1,2}";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-inline-width {
+  /* shorthand for;
+   *   border-inline-start-width: medium;
+   *   border-inline-end-width: medium;
+   */
+  syntax: "<border-top-width>{1,2}";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_border-radius {
+  /* shorthand for;
+   *   border-start-start-radius: 0;
+   *   border-start-end-radius: 0;
+   *   border-end-end-radius: 0;
+   *   border-end-start-radius: 0;
+   */
+  syntax: "<length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_caret {
+  /* shorthand for;
+   *   caret-color: auto;
+   *   caret-animation: auto;
+   *   caret-shape: auto;
+   */
+  syntax: "<caret-color> || <caret-animation> || <caret-shape>";
+  initial-value: auto;
+  inherits: true;
+}
+
+@property --_column-rule {
+  /* shorthand for;
+   *   column-rule-width: medium;
+   *   column-rule-style: none;
+   *   column-rule-color: currentcolor;
+   */
+  syntax: "<gap-rule-list> | <gap-auto-rule-list>";
+  initial-value: medium none currentcolor;
+  inherits: false;
+}
+
+@property --_columns {
+  /* shorthand for;
+   *   column-width: auto;
+   *   column-count: auto;
+   *   column-height: auto;
+   */
+  syntax: "[ <column-width> || <column-count> ] [ / <column-height> ]?";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_contain-intrinsic-size {
+  /* shorthand for;
+   *   contain-intrinsic-inline-size: none;
+   *   contain-intrinsic-block-size: none;
+   */
+  syntax: "[ auto? [ none | <length [0,∞]> ] ]{1,2}";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_container {
+  /* shorthand for;
+   *   container-name: none;
+   *   container-type: normal;
+   */
+  syntax: "<container-name> [ / <container-type> ]?";
+  initial-value: none normal;
+  inherits: false;
+}
+
+@property --_corner-block-end-shape {
+  /* shorthand for;
+   *  corner-end-start-shape: round;
+   *  corner-end-end-shape: round;
+   */
+  syntax: "<corner-top-left-shape>{1,2}";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-block-start-shape {
+  /* shorthand for;
+   *  corner-end-start-shape: round;
+   *  corner-end-end-shape: round;
+   */
+  syntax: "<corner-top-left-shape>{1,2}";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-inline-end-shape {
+  /* shorthand for;
+   *   corner-start-end-shape: round;
+   *   corner-end-end-shape: round;
+   */
+  syntax: "<corner-top-left-shape>{1,2}";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-inline-start-shape {
+  /* shorthand for;
+   *   corner-start-end-shape: round;
+   *   corner-end-end-shape: round;
+   */
+  syntax: "<corner-top-left-shape>{1,2}";
+  initial-value: "<corner-top-left-shape>{1,2}";
+  inherits: false;
+}
+@property --_flex {
+  /* shorthand for;
+   *   flex-grow: 0;
+   *   flex-shrink: 1;
+   *   flex-basis: auto;
+   */
+  syntax: "none | [ <flex-grow> <flex-shrink>? || <flex-basis> ]";
+  initial-value: 0 1 auto;
+  inherits: false;
+}
+
+@property --_flex-flow {
+  /* shorthand for;
+   *   flex-direction: row;
+   *   flex-wrap: nowrap;
+   */
+  syntax: "<flex-direction> || <flex-wrap>";
+  initial-value: row nowrap;
+  inherits: false;
+}
+
+@property --_font {
+  /* shorthand for;
+   *   font-style: normal;
+   *   font-variant: normal;
+   *   font-weight: normal;
+   *   font-stretch: normal;
+   *   font-size: medium;
+   *   line-height: normal;
+   *   font-family: sans-serif;
+   */
+  syntax: "[ [ <font-style> || <font-variant-css2> || <font-weight> || <font-width-css3> ]? <font-size> [ / <line-height> ]? <font-family># ] | <system-font-family-name>";
+  initial-value: normal normal normal normal medium normal sans-serif;
+  inherits: true;
+}
+
+@property --_font-synthesis {
+  /* shorthand for;
+   *   font-synthesis-weight: weight;
+   *   font-synthesis-style: style;
+   *   font-synthesis-small-caps: small-caps;
+   *   font-synthesis-position: position;
+   */   syntax: none | [ weight || style || small-caps || position ];
+  initial-value: weight style small-caps position;
+  inherits: true;
+}
+
+@property --_font-variant {
+  /* shorthand for;
+   *   font-variant-alternates: normal;
+   *   font-variant-caps: normal;
+   *   font-variant-east-asian: normal;
+   *   font-variant-emoji: normal;
+   *   font-variant-ligatures: normal;
+   *   font-variant-numeric: normal;
+   *   font-variant-position: normal;
+   */   syntax: normal | none | [ [ <common-lig-values> || <discretionary-lig-values> || <historical-lig-values> || <contextual-alt-values> ] || [ small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps ] || [ stylistic( <font-feature-value-name> ) || historical-forms || styleset( <font-feature-value-name># ) || character-variant( <font-feature-value-name># ) || swash( <font-feature-value-name> ) || ornaments( <font-feature-value-name> ) || annotation( <font-feature-value-name> ) ] || [ <numeric-figure-values> || <numeric-spacing-values> || <numeric-fraction-values> || ordinal || slashed-zero ] || [ <east-asian-variant-values> || <east-asian-width-values> || ruby ] || [ sub | super ] || [ text | emoji | unicode ] ];
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_gap {
+  /* shorthand for;
+   *   row-gap: normal;
+   *   column-gap: normal;
+   */
+  syntax: "<row-gap> <column-gap>?";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_grid {
+  /* shorthand for;
+   *   grid-template-rows: none;
+   *   grid-template-columns: none;
+   *   grid-template-areas: none;
+   *   grid-auto-rows: auto;
+   *   grid-auto-columns: auto;
+   *   grid-auto-flow: row;
+   *   grid-column-gap: 0;
+   *   grid-row-gap: 0;
+   *   column-gap: normal;
+   *   row-gap: normal;
+   */
+  syntax: "<grid-template> | <grid-template-rows> / [ auto-flow && dense? ] <grid-auto-columns>? | [ auto-flow && dense? ] <grid-auto-rows>? / <grid-template-columns>";
+  initial-value: none none none auto auto row 0 0 normal normal;
+  inherits: false;
+}
+
+@property --_grid-area {
+  /* shorthand for;
+   *   grid-row-start: auto;
+   *   grid-column-start: auto;
+   *   grid-row-end: auto;
+   *   grid-column-end: auto;
+   */
+  syntax: "<grid-line> [ / <grid-line> ]{0,3}";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_grid-column {
+  /* shorthand for;
+   *   grid-column-start: auto;
+   *   grid-column-end: auto;
+   */
+  syntax: "<grid-line> [ / <grid-line> ]?";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_grid-row {
+  /* shorthand for;
+   * grid-row-start: auto;
+   * grid-row-end: auto;
+   */
+  syntax: "<grid-line> [ / <grid-line> ]?";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_grid-template {
+  /* shorthand for;
+   *   grid-template-columns: none;
+   *   grid-template-rows: none;
+   *   grid-template-areas: none;
+   */
+  syntax: "none | [ <grid-template-rows> / <grid-template-columns> ] | [ <line-names>? <string> <track-size>? <line-names>? ]+ [ / <explicit-track-list> ]?";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_inset {
+  /* shorthand for;
+   *   top: auto;
+   *   right: auto;
+   *   bottom: auto;
+   *   left: auto;
+   */
+  syntax: "<top>{1,4}";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_inset-block {
+  /* shorthand for;
+   *   inset-block-start: auto;
+   *   inset-block-end: auto;
+   */
+  syntax: "<top>{1,2}";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_interest-delay {
+  /* shorthand for;
+   *   interest-delay-start: normal;
+   *   interest-delay-end: normal;
+   */
+  syntax: "<interest-delay-start>{1,2}";
+  initial-value: normal;
+  inherits: true;
+}
+
+@property --_list-style {
+  /* shorthand for;
+   *   list-style-type: disc;
+   *   list-style-position: outside;
+   *   list-style-image: none;
+   */
+  syntax: "<list-style-position> || <list-style-image> || <list-style-type>";
+  initial-value: disc outside none;
+  inherits: true;
+}
+
+@property --_margin {
+  /* shorthand for;
+   *   margin-top: 0;
+   *   margin-right: 0;
+   *   margin-bottom: 0;
+   *   margin-left: 0;
+   */
+  syntax: "<margin-top>{1,4}";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_margin-block {
+  /* shorthand for;
+   *   margin-block-start: 0;
+   *   margin-block-end: 0;
+   */
+  syntax: "<margin-top>{1,4}";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_margin-inline {
+  /* shorthand for;
+   *   margin-inline-start: 0;
+   *   margin-inline-end: 0;
+   */
+  syntax: "<margin-top>{1,2}";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_marker {
+  /* shorthand for;
+   * marker-start: none;
+   * marker-mid: none;
+   * marker-end: none;
+   */
+  syntax: "none | <marker-ref>";
+  initial-value: none;
+  inherits: true;
+}
+
+@property --_mask {
+  /* shorthand for;
+   *   mask-image: none;
+   *   mask-mode: match-source;
+   *   mask-repeat: repeat;
+   *   mask-position: 0% 0%;
+   *   mask-clip: border-box;
+   *   mask-origin: border-box;
+   *   mask-size: auto;
+   *   mask-composite: add;
+   */
+  syntax: "<mask-layer>#";
+  initial-value: none match-source repeat 0% 0% border-box border-box auto add;
+  inherits: false;
+}
+
+@property --_mask-border {
+  /* shorthand for;
+   *   mask-border-mode: alpha;
+   *   mask-border-outset: o;
+   *   mask-border-repeat: stretch;
+   *   mask-border-slice: o;
+   *   mask-border-source: none;
+   *   mask-border-width: auto;
+   */
+  syntax: "<mask-border-source> || <mask-border-slice> [ / <mask-border-width>? [ / <mask-border-outset> ]? ]? || <mask-border-repeat> || <mask-border-mode>";
+  initial-value: alpha 0 stretch 0 none auto;
+  inherits: false;
+}
+
+@property --_offset {
+  /* shorthand for;
+   *   offset-position: normal;
+   *   offset-path: none;
+   *   offset-distance: 0;
+   *   offset-anchor: auto;
+   *   offset-rotate: auto;
+   */
+  syntax: "[ <offset-position>? [ <offset-path> [ <offset-distance> || <offset-rotate> ]? ]? ]! [ / <offset-anchor> ]?";
+  initial-value: normal none 0 auto auto;
+  inherits: false;
+}
+
+@property --_outline {
+  /* shorthand for;
+   *   outline-width: medium;
+   *   outline-style: none;
+   *   outline-color: auto;
+   */
+  syntax: "<outline-width> || <outline-style> || <outline-color>";
+  initial-value: medium none auto;
+  inherits: false;
+}
+
+@property --_overscroll-behavior {
+  /* shorthand for;
+   *   overscroll-behavior-x: 0;
+   *   overscroll-behavior-y: 0;
+   */
+  syntax: "[ contain | none | auto | chain ]{1,2}";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_padding {
+  /* shorthand for;
+   *   padding-top: 0;
+   *   padding-right: 0;
+   *   padding-bottom: 0;
+   *   padding-left: 0;
+   */
+  syntax: "<'padding-top'>{1,4}";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_padding-block {
+  /* shorthand for;
+   *   padding-block-start: 0;
+   *   padding-block-end: 0;
+   */
+  syntax: "<padding-top>{1,2}";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_padding-inline {
+  /* shorthand for;
+   *   padding-inline-start: 0;
+   *   padding-inline-end: 0;
+   */
+  syntax: "<padding-top>{1,2}";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_place-content {
+  /* shorthand for;
+   *   align-content: normal;
+   *   justify-content: normal;
+   */
+  syntax: "<align-content> <justify-content>?";
+  initial-value: normal;
+  inherits: false;
+}
+
+@property --_place-items {
+  /* shorthand for;
+   *   align-items: normal;
+   *   justify-items: legacy;
+   */
+  syntax: "<align-items> <justify-items>?";
+  initial-value: normal legacy;
+  inherits: false;
+}
+
+@property --_place-self {
+  /* shorthand for;
+   *   align-self: auto;
+   *   justify-self: auto;
+   */
+  syntax: "<align-self> <justify-self>?";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_position-try {
+  /* shorthand for;
+   *   position-try-fallbacks: none;
+   *   position-try-order: normal;
+   */
+  syntax: "<position-try-order>? <position-try-fallbacks>";
+  initial-value: none normal;
+  inherits: false;
+}
+
+@property --_scroll-margin {
+  /* shorthand for;
+   *   scroll-margin-bottom: 0;
+   *   scroll-margin-left: 0;
+   *   scroll-margin-right: 0;
+   *   scroll-margin-top: 0;
+   */
+  syntax: "<length>{1,4}";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_scroll-margin-block {
+  /* shorthand for;
+   *   scroll-margin-block-start: 0;
+   *   scroll-margin-block-end: 0;
+   */
+  syntax: "<length>{1,2}";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_scroll-margin-inline {
+  /* shorthand for;
+   *   scroll-margin-inline-start: 0;
+   *   scroll-margin-inline-end: 0;
+   */
+  syntax: "<length>{1,2}";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_scroll-padding {
+  /* shorthand for;
+   *   scroll-padding-bottom: auto;
+   *   scroll-padding-left: auto;
+   *   scroll-padding-right: auto;
+   *   scroll-padding-top: auto;
+   */
+  syntax: "[ auto | <length-percentage [0,∞]> ]{1,4}";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scroll-padding-block {
+  /* shorthand for;
+   *   scroll-padding-block-start: 0;
+   *   scroll-padding-block-end: 0;
+   */
+  syntax: "[ auto | <length-percentage [0,∞]> ]{1,2}";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scroll-padding-inline {
+  /* shorthand for;
+   *   scroll-padding-inline-start: 0;
+   *   scroll-padding-inline-end: 0;
+   */
+  syntax: "[ auto | <length-percentage [0,∞]> ]{1,2}";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_scroll-timeline {
+  /* shorthand for;
+   *   scroll-timeline-name: none;
+   *   scroll-timeline-axis: block;
+   */
+  syntax: "[ <scroll-timeline-name> <scroll-timeline-axis>? ]#";
+  initial-value: none block;
+  inherits: false;
+}
+
+@property --_stroke {
+  /* shorthand for;
+   *   stroke-dasharray: none;
+   *   stroke-dashoffset: 0;
+   *   stroke-linecap: butt;
+   *   stroke-linejoin: miter;
+   *   stroke-miterlimit: 4;
+   *   stroke-opacity: 1;
+   *   stroke-width: 1px;
+   */
+  syntax: "<paint>";
+  initial-value: none 0 butt miter 4 1 1px;
+  inherits: true;
+}
+
+@property --_text-box {
+  /* shorthand for;
+   *   text-box-trim: none;
+   *   text-box-edge: auto;
+   */
+  syntax: "normal | <text-box-trim> || <text-box-edge>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_text-decoration {
+  /* shorthand for;
+   *   text-decoration-line: none;
+   *   text-decoration-style: solid;
+   *   text-decoration-color: currentcolor;
+   */
+  syntax: "<text-decoration-line> || <text-decoration-thickness> || <text-decoration-style> || <text-decoration-color>";
+  initial-value: none solid currentcolor;
+  inherits: false;
+}
+
+@property --_text-emphasis {
+  /* shorthand for;
+   *   text-emphasis-style: none;
+   *   text-emphasis-color: currentcolor;
+   */
+  syntax: "<text-emphasis-style> || <text-emphasis-color>";
+  initial-value: none currentcolor;
+  inherits: true;
+}
+
+@property --_text-wrap {
+  /* shorthand for;
+   *   text-wrap-mode: wrap;
+   *   text-wrap-style: auto;
+   */
+  syntax: "<text-wrap-mode> || <text-wrap-style>";
+  initial-value: wrap;
+  inherits: true;
+}
+
+@property --_transition {
+  /* shorthand for;
+   *   transition-delay: 0s;
+   *   transition-duration: 0s;
+   *   transition-property: all;
+   *   transition-timing-function: ease;
+   *   transition-behavior: normal;
+   */
+  syntax: "<single-transition>#";
+  initial-value: 0s 0s all ease normal;
+  inherits: false;
+}
+
+@property --_vertical-align {
+  /* shorthand for;
+   *   alignment-baseline;
+   *   baseline-source;
+   *   baseline-shift;
+   */
+  syntax: "[ first | last ] || <alignment-baseline> || <baseline-shift>";
+  initial-value: baseline;
+  inherits: false;
+}
+
+@property --_view-timeline {
+  /* shorthand for;
+   *   view-timeline-name: none;
+   *   view-timeline-axis: block;
+   */
+  syntax: "[ <view-timeline-name> [ <view-timeline-axis> || <view-timeline-inset> ]? ]#";
+  initial-value: none block;
+  inherits: false;
+}
+
+@property --_white-space {
+  /* shorthand for;
+   *   white-space-collapse: normal;
+   *   text-wrap-mode: normal;
+   */
+  syntax: "normal | pre | pre-wrap | pre-line | <white-space-collapse> || <text-wrap-mode> || <white-space-trim>";
+  initial-value: normal;
+  inherits: true;
+}
+
+/* These will most likely be deprecated in a couple of years. */
+
+@property --_top {
+  syntax: "auto | <length-percentage> | <anchor()> | <anchor-size()>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_right {
+  syntax: "auto | <length-percentage> | <anchor()> | <anchor-size()>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_bottom {
+  syntax: "auto | <length-percentage> | <anchor()> | <anchor-size()>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_left {
+  syntax: "auto | <length-percentage> | <anchor()> | <anchor-size()>";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_width {
+  syntax: "auto | <length-percentage [0,∞]> | min-content | max-content | fit-content( <length-percentage [0,∞]> ) | <calc-size()> | <anchor-size()> | stretch | fit-content | contain";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_height {
+  syntax: "auto | <length-percentage [0,∞]> | min-content | max-content | fit-content( <length-percentage [0,∞]> ) | <calc-size()> | <anchor-size()> | stretch | fit-content | contain";
+  initial-value: auto;
+  inherits: false;
+}
+
+@property --_margin-top {
+  syntax: "<length-percentage> | auto | <anchor-size()>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_margin-right {
+  syntax: "<length-percentage> | auto | <anchor-size()>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_margin-bottom {
+  syntax: "<length-percentage> | auto | <anchor-size()>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_margin-left {
+  syntax: "<length-percentage> | auto | <anchor-size()>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_border-top-width {
+  syntax: "<line-width>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_border-top-style {
+  syntax: "<line-style>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-top-color {
+  syntax: "<color> | <image-1D>";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_border-top {
+  /* shorthand for;
+   *   border-top-width: medium;
+   *   border-top-style: none;
+   *   border-top-color: currentcolor;
+   */
+  syntax: "<line-width> || <line-style> || <color>";
+  initial-value: medium none currentcolor;
+  inherits: false;
+}
+
+@property --_border-right-width {
+  syntax: "<line-width>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_border-right-style {
+  syntax: "<line-style>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-right-color {
+  syntax: "<color> | <image-1D>";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_border-right {
+  /* shorthand for;
+   *  border-right-width: medium;
+   *  border-right-style: none;
+   *  border-right-color: currentcolor;
+   */
+  syntax: "<line-width> || <line-style> || <color>";
+  initial-value: medium none currentcolor;
+  inherits: false;
+}
+
+@property --_border-bottom-width {
+  syntax: "<line-width>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_border-bottom-style {
+  syntax: "<line-style>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-bottom-color {
+  syntax: "<color> | <image-1D>";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_border-bottom {
+  syntax: "<line-width> || <line-style> || <color>";
+  initial-value: medium none currentcolor;
+  inherits: false;
+}
+
+@property --_border-left-width {
+  syntax: "<line-width>";
+  initial-value: medium;
+  inherits: false;
+}
+
+@property --_border-left-style {
+  syntax: "<line-style>";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-left-color {
+  syntax: "<color> | <image-1D>";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_border-left {
+  /* shorthand for;
+   *   border-left-width: medium;
+   *   border-left-style: none;
+   *   border-left-color: currentcolor;
+   */
+  syntax: "<line-width> || <line-style> || <color>";
+  initial-value: medium none currentcolor;
+  inherits: false;
+}
+
+@property --_border-width {
+  /* shorthand for;
+   *   border-top-width
+   *   border-right-width
+   *   border-bottom-width
+   *   border-left-width
+   */
+  syntax: "<border-top-width>{1,4}";
+  initial-value: medium;
+  inherits: no;
+}
+
+@property --_border-style {
+  /* shorthand for;
+   *   border-block-start-style: none;
+   *   border-inline-end-style: none;
+   *   border-block-end: none;
+   *   border-inline-start-style: none;
+   */
+  syntax: "<border-top-style>{1,4}";
+  initial-value: none;
+  inherits: false;
+}
+
+@property --_border-color {
+  /* shorthand for;
+   *   border-block-start-color: currentcolor;
+   *   border-inline-end-color: currentcolor;
+   *   border-block-end-color: currentcolor;
+   *   border-inline-start-color: currentcolor;
+   */
+  syntax: "[ <color> | <image-1D> ]{1,4}";
+  initial-value: currentcolor;
+  inherits: false;
+}
+
+@property --_border-top-left-radius {
+  syntax: "<border-radius>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_border-top-right-radius {
+  syntax: "<border-radius>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_border-bottom-right-radius {
+  syntax: "<border-radius>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_border-bottom-left-radius {
+  syntax: "<border-radius>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --_corner-top-left-shape {
+  syntax: "<corner-shape-value>";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-top-right-shape {
+  syntax: "<corner-shape-value>";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-bottom-right-shape {
+  syntax: "<corner-shape-value>";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-bottom-left-shape {
+  syntax: "<corner-shape-value>";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-top-shape {
+  /* shorthand for;
+   *   corner-top-left-shape: round;
+   *   corner-top-right-shape: round;
+   */
+  syntax: "<corner-top-left-shape>{1,2}";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-right-shape {
+  /* shorthand for;
+  *   corner-top-right-shape: round;
+  *   corner-bottom-right-shape: round;
+  */
+  syntax: "<corner-top-left-shape>{1,2}";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-bottom-shape {
+  /* shorthand for;
+  *   corner-bottom-left-shape: round;
+  *   corner-bottom-right-shape: round;
+  */
+  syntax: "<corner-top-left-shape>{1,2}";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-left-shape {
+  /* shorthand for;
+   *   corner-top-left-shape: round;
+   *   corner-bottom-left-shape: round;
+   */
+  syntax: "<corner-top-left-shape>{1,2}";
+  initial-value: round;
+  inherits: false;
+}
+
+@property --_corner-shape {
+  /* shorthand for;
+   *   corner-top-left-shape: round;
+   *   corner-top-right-shape: round;
+   *   corner-bottom-left-shape: round;
+   *   corner-bottom-right-shape: round;
+   */
+  syntax: "<corner-top-left-shape>{1,4}";
+  initial-value: round;
+  inherits: false;
+}
+
+
+
+
+
+/* Assign the "@property --css-variables" to the selectors,
+ * our variables then the "private" variables as fallback.
+ * We either do it here, all at once, or piecemeal later.
+ * And we still need to set them to the actual value,
+ * but that gets done as we go.
+ *
+ * Now do we comment out the @property and selectors we're not using yet?
+ */
+:root {
+  accent-color: var(--accent-color, --_accent-color);
+  align-content: var(--align-content, --_align-content);
+  align-items: var(--align-items, --_align-items);
+  align-self: var(--align-self, --_align-self);
+  alignment-baseline: var(--alignment-baseline, --_alignment-baseline);
+  anchor-name: var(--anchor-name, --_anchor-name);
+  anchor-scope: var(--anchor-scope, --_anchor-scope);
+  animation-composition: var(--animation-composition, --_animation-composition);
+  animation-delay: var(--animation-delay, --_animation-delay);
+  animation-direction: var(--animation-direction, --_animation-direction);
+  animation-duration: var(--animation-duration, --_animation-duration);
+  animation-fill-mode: var(--animation-fill-mode, --_animation-fill-mode);
+  animation-iteration-count: var(--animation-iteration-count, --_animation-iteration-count);
+  animation-name: var(--animation-name, --_animation-name);
+  animation-play-state: var(--animation-play-state, --_animation-play-state);
+  animation-range-end: var(--animation-range-end, --_animation-range-end);
+  animation-range-start: var(--animation-range-start, --_animation-range-start);
+  animation-range:  var(--animation-range, --_animation-range);
+  animation-range: var(--animation-range-start, normal) var(--animation-range-end, normal);
+  animation-timeline: var(--animation-timeline, --_animation-timeline);
+  animation-timing-function: var(--animation-timing-function, --_animation-timing-function);
+  animation:  var(--animation, --_animation);
+  animation: var(--animation-name, none) var(--animation-duration, 0s) var(--animation-timing-function, ease) var(--animation-delay, 0s) var(--animation-iteration-count, 1) var(--animation-direction, normal) var(--animation-fill-mode, none) var(--animation-play-state, running) var(--animation-timeline, auto);
+  appearance: var(--appearance, --_appearance);
+  aspect-ratio: var(--aspect-ratio, --_aspect-ratio);
+  backdrop-filter: var(--backdrop-filter, --_backdrop-filter);
+  backface-visibility: var(--backface-visibility, --_backface-visibility);
+  background-attachment: var(--bg-attachment, --_background-attachment);
+  background-blend-mode: var(--bg-blend-mode, --_background-blend-mode);
+  background-clip: var(--bg-clip, --_background-clip);
+  background-color: var(--bg-color, --_background-color);
+  background-image: var(--bg-image, --_background-image);
+  background-origin: var(--bg-origin, --_background-origin);
+  background-position-x: var(--bg-position-x, --_background-position-x);
+  background-position-y: var(--bg-position-y, --_background-position-y);
+  background-position:  var(--bg-position, --_background-position);
+  background-position: var(--bg-position-x, 0%) var(--bg-position-y, 0%);
+  background-repeat-x: var(--bg-repeat-x, --_background-repeat-x);
+  background-repeat-y: var(--bg-repeat-y, --_background-repeat-y);
+  background-repeat:  var(--bg-repeat, --_background-repeat);
+  background-repeat: var(--bg-repeat-x, repeat) var(--background-repeat-y, repeat);
+  background-size: var(--bg-size, --_background-size);
+  background:  var(--bg, --_background);
+  background: var(--bg-image, none) var(--bg-position, 0% 0%) var(--bg-size, auto auto) var(--bg-repeat, repeat) var(--bg-origin, padding-box) var(--bg-clip, border-box) var(--bg-attachment, scroll) var(--bg-color, transparent);
+  baseline-shift: var(--baseline-shift, --_baseline-shift);
+  baseline-source: var(--baseline-source, --_baseline-source);
+  block-size: var(--block-size, --_block-size);
+  border-block-color:  var(--border-block-color, --_border-block-color);
+  border-block-color: var(--border-block-start-color, currentcolor) var(--border-block-end-color, currentcolor );
+  border-block-end-color: var(--border-block-end-color, --_border-block-end-color);
+  border-block-end-style: var(--border-block-end-style, --_border-block-end-style);
+  border-block-end-width: var(--border-block-end-width, --_border-block-end-width);
+  border-block-end:  var(--border-block-end, --_border-block-end);
+  border-block-end: var(--border-block-end-width, medium) var(--border-block-end-style, none) var(--border-block-end-color, currentcolor);
+  border-block-start-color: var(--border-block-start-color, --_border-block-start-color);
+  border-block-start-style: var(--border-block-start-style, --_border-block-start-style);
+  border-block-start-width: var(--border-block-start-width, --_border-block-start-width);
+  border-block-start:  var(--border-block-start, --_border-block-start);
+  border-block-start: var(--border-block-start-width, medium) var(--border-block-start-style, none) var(--border-block-start-color, currentcolor);
+  border-block-style: var(--border-block-style, --_border-block-style);
+  border-block-width: var(--border-block-width, --_border-block-width);
+  border-block:  var(--border-block, --_border-block);
+  border-block: var(--border-block-width, medium) var(--border-block-style, none) var(--border-block-color, currentcolor);
+  border-bottom-color: var(--border-bottom-color, --_border-bottom-color);
+  border-bottom-left-radius: var(--border-bottom-left-radius, --_border-bottom-left-radius);
+  border-bottom-right-radius: var(--border-bottom-right-radius, --_border-bottom-right-radius);
+  border-bottom-style: var(--border-bottom-style, --_border-bottom-style);
+  border-bottom-width: var(--border-bottom-width, --_border-bottom-width);
+  border-bottom:  var(--border-bottom, --_border-bottom);
+  border-bottom: var(--border-bottom-width, medium) var(--border-bottom-style, none) var(--border-bottom-color, currentcolor);
+  border-collapse: var(--border-collapse, --_border-collapse);
+  border-color:  var(--border-color, --_border-color);
+  border-color: var(--border-top-color, currentcolor) var(--border-right-color, currentcolor) var(--border-bottom-color, currentcolor) var(--border-left-color, currentcolor);
+  border-end-end-radius: var(--border-end-end-radius, --_border-end-end-radius);
+  border-end-start-radius: var(--border-end-start-radius, --_border-end-start-radius);
+  border-image-outset: var(--border-image-outset, --_border-image-outset);
+  border-image-repeat: var(--border-image-repeat, --_border-image-repeat);
+  border-image-slice: var(--border-image-slice, --_border-image-slice);
+  border-image-source: var(--border-image-source, --_border-image-source);
+  border-image-width: var(--border-image-width, --_border-image-width);
+  border-image:  var(--border-image, --_border-image);
+  border-image: var(--border-image-source, none) var(--border-image-slice, 100%) var(--border-image-width, 1) var(--border-image-outset, 0) var(--border-image-repeat, stretch);
+  border-inline-color: var(--border-inline-color, --_border-inline-color);
+  border-inline-end-color: var(--border-inline-end-color, --_border-inline-end-color);
+  border-inline-end-style: var(--border-inline-end-style, --_border-inline-end-style);
+  border-inline-end-width: var(--border-inline-end-width, --_border-inline-end-width);
+  border-inline-end:  var(--border-inline-end, --_border-inline-end);
+  border-inline-end: var(--border-inline-end-width, medium) var(--border-inline-end-style, none) var(--border-inline-end-color, currentcolor);
+  border-inline-start-color: var(--border-inline-start-color, --_border-inline-start-color);
+  border-inline-start-style: var(--border-inline-start-style, --_border-inline-start-style);
+  border-inline-start-width: var(--border-inline-start-width, --_border-inline-start-width);
+  border-inline-start:  var(--border-inline-start, --_border-inline-start);
+  border-inline-start: var(--border-inline-start-width, medium) var(--border-inline-start-style, none) var(--border-inline-start-color, currentcolor);
+  border-inline-style: var(--border-inline-style, --_border-inline-style);
+  border-inline-width: var(--border-inline-width, --_border-inline-width);
+  border-inline:  var(--border-inline, --_border-inline);
+  border-inline: var(--border-inline-width, medium) var(--border-inline-style, none) var(--border-inline-color, currentcolor);
+  border-left-color: var(--border-left-color, --_border-left-color);
+  border-left-style: var(--border-left-style, --_border-left-style);
+  border-left-width: var(--border-left-width, --_border-left-width);
+  border-left:  var(--border-left, --_border-left);
+  border-left: var(--border-left-width, medium) var(--border-left-style, none) var(--border-left-color, currentcolor);
+  border-radius:  var(--border-radius, --_border-radius);
+  border-radius: var(--border-top-left-radius, 0) var(--border-top-right-radius, 0) var(--border-bottom-right-radius, 0) var(--border-bottom-left-radius, 0);
+  border-right-color: var(--border-right-color, --_border-right-color);
+  border-right-style: var(--border-right-style, --_border-right-style);
+  border-right-width: var(--border-right-width, --_border-right-width);
+  border-right:  var(--border-right, --_border-right);
+  border-right: var(--border-right-width, medium) var(--border-right-style, none) var(--border-right-color, currentcolor);
+  border-shape: var(--border-shape, --_border-shape);
+  border-spacing: var(--border-spacing, --_border-spacing);
+  border-start-end-radius: var(--border-start-end-radius, --_border-start-end-radius);
+  border-start-start-radius: var(--border-start-start-radius, --_border-start-start-radius);
+  border-style:  var(--border-style, --_border-style);
+  border-style: var(--border-top-style, none) var(--border-right-style, none) var(--border-bottom-style, none) var(--border-left-style, none);
+  border-top-color: var(--border-top-color, --_border-top-color);
+  border-top-left-radius: var(--border-top-left-radius, --_border-top-left-radius);
+  border-top-right-radius: var(--border-top-right-radius, --_border-top-right-radius);
+  border-top-style: var(--border-top-style, --_border-top-style);
+  border-top-width: var(--border-top-width, --_border-top-width);
+  border-top:  var(--border-top, --_border-top);
+  border-top: var(--border-top-width, medium) var(--border-top-style, none) var(--border-top-color, currentcolor);
+  border-width:  var(--border-width, --_border-width);
+  border-width: var(--border-top-width, medium) var(--border-right-width, medium) var(--border-bottom-width, medium) var(--border-left-width, medium);
+  border:  var(--border, --_border);
+  border: var(--border-width, medium) var(--border-style, none) var(--border-color, currentcolor);
+  bottom: var(--bottom, --_bottom);
+  box-decoration-break: var(--box-decoration-break, --_box-decoration-break);
+  box-shadow: var(--box-shadow, --_box-shadow);
+  box-sizing: var(--box-sizing, --_box-sizing);
+  break-after: var(--break-after, --_break-after);
+  break-before: var(--break-before, --_break-before);
+  break-inside: var(--break-inside, --_break-inside);
+  caption-side: var(--caption-side, --_caption-side);
+  caret-animation: var(--caret-animation, --_caret-animation);
+  caret-color: var(--caret-color, --_caret-color);
+  caret-shape: var(--caret-shape, --_caret-shape);
+  caret:  var(--caret, --_caret);
+  caret: var(--caret-color, auto) var(--caret-animation, auto) var(--caret-shape, auto);
+  clear: var(--clear, --_clear);
+  clip-path: var(--clip-path, --_clip-path);
+  clip-rule: var(--clip-rule, --_clip-rule);
+  clip: var(--clip, --_clip);
+  color-interpolation-filters: var(--color-interpolation-filters, --_color-interpolation-filters);
+  color-interpolation: var(--color-interpolation, --_color-interpolation);
+  color-scheme: var(--color-scheme, --_color-scheme);
+  color: var(--color, --_color);
+  column-count: var(--column-count, --_column-count);
+  column-fill: var(--column-fill, --_column-fill);
+  column-gap: var(--column-gap, --_column-gap);
+  column-height: var(--column-height, --_column-height);
+  column-rule-color: var(--column-rule-color, --_column-rule-color);
+  column-rule-style: var(--column-rule-style, --_column-rule-style);
+  column-rule-visibility-items: var(--column-rule-visibility-items, --_column-rule-visibility-items);
+  column-rule-width: var(--column-rule-width, --_column-rule-width);
+  column-rule:  var(--column-rule, --_column-rule);
+  column-rule: var(--column-rule-width, medium) var(--column-rule-style, none) var(--column-rule-color, curentcolor);
+  column-span: var(--column-span, --_column-span);
+  column-width: var(--column-width, --_column-width);
+  column-wrap: var(--column-wrap, --_column-wrap);
+  columns:  var(--columns, --_columns);
+  columns: var(--column-width, auto) var(--column-count, auto) var(--column-height, auto);
+  contain-intrinsic-block-size: var(--contain-intrinsic-block-size, --_contain-intrinsic-block-size);
+  contain-intrinsic-height: var(--contain-intrinsic-height, --_contain-intrinsic-height);
+  contain-intrinsic-size:  var(--contain-intrinsic-width, none) var(--contain-intrinsic-height, none);
+  contain-intrinsic-size: var(--contain-intrinsic-size, --_contain-intrinsic-size);
+  contain-intrinsic-width: var(--contain-intrinsic-width, --_contain-intrinsic-width);
+  contain: var(--contain, --_contain);
+  container-name: var(--container-name, --_container-name);
+  container-type: var(--container-type, --_container-type);
+  container:  var(--container, --_container);
+  container: var(--container-name, none) var(--container-type, normal);
+  content-visibility: var(--content-visibility, --_content-visibility);
+  content: var(--content, --_content);
+  corner-block-end-shape: var(--corner-block-end-shape, --_corner-block-end-shape);
+  corner-block-start-shape: var(--corner-block-start-shape, --_corner-block-start-shape);
+  corner-bottom-left-shape: var(--corner-bottom-left-shape, --_corner-bottom-left-shape);
+  corner-bottom-right-shape: var(--corner-bottom-right-shape, --_corner-bottom-right-shape);
+  corner-bottom-shape:  var(--corner-bottom-shape, --_corner-bottom-shape);
+  corner-bottom-shape: var(--corner-bottom-left-shape, round) var(--corner-bottom-right-shape, round);
+  corner-end-end-shape: var(--corner-end-end-shape, --_corner-end-end-shape);
+  corner-end-start-shape: var(--corner-end-start-shape, --_corner-end-start-shape);
+  corner-inline-end-shape: var(--corner-inline-end-shape, --_corner-inline-end-shape);
+  corner-inline-start-shape: var(--corner-inline-start-shape, --_corner-inline-start-shape);
+  corner-left-shape:  var(--corner-left-shape, --_corner-left-shape);
+  corner-left-shape: var(--corner-top-left-shape, round) var(--corner-bottom-left-shape, round);
+  corner-right-shape:  var(--corner-right-shape, --_corner-right-shape);
+  corner-right-shape: var(--corner-top-right-shape, round) var(--corner-bottom-right-shape, round);
+  corner-shape:  var(--corner-shape, --_corner-shape);
+  corner-shape: var(--corner-top-left-shape, round) var(--corner-top-right-shape, round) var(--corner-bottom-right-shape, round) var(--corner-bottom-left-shape, round);
+  corner-start-end-shape: var(--corner-start-end-shape, --_corner-start-end-shape);
+  corner-start-start-shape: var(--corner-start-start-shape, --_corner-start-start-shape);
+  corner-top-left-shape: var(--corner-top-left-shape, --_corner-top-left-shape);
+  corner-top-right-shape: var(--corner-top-right-shape, --_corner-top-right-shape);
+  corner-top-shape:  var(--corner-top-shape, --_corner-top-shape);
+  corner-top-shape: var(--corner-top-left-shape, round) var(--corner-top-right-shape, round);
+  counter-increment: var(--counter-increment, --_counter-increment);
+  counter-reset: var(--counter-reset, --_counter-reset);
+  counter-set: var(--counter-set, --_counter-set);
+  cursor: var(--cursor, --_cursor);
+  cx: var(--cx, --_cx);
+  cy: var(--cv, --_cv);
+  d: var(--d, --_d);
+  direction: var(--direction, --_direction);
+  display: var(--display, --_display);
+  dominant-baseline: var(--dominant-baseline, --_dominant-baseline);
+  dynamic-range-limit: var(--dynamic-range-limit, --_dynamic-range-limit);
+  empty-cells: var(--empty-cells, --_empty-cells);
+  field-sizing: var(--field-sizing, --_field-sizing);
+  fill-opacity: var(--fill-opacity, --_fill-opacity);
+  fill-rule: var(--fill-rule, --_fill-rule);
+  fill: var(--fill, --_fill);
+  filter: var(--filter, --_filter);
+  flex-basis: var(--flex-basis, --_flex-basis);
+  flex-direction: var(--flex-direction, --_flex-direction);
+  flex-flow:  var(--flex-flow, --_flex-flow);
+  flex-flow: var(--flex-direction, row) var(--flex-wrap, nowrap);
+  flex-grow: var(--flex-grow, --_flex-grow);
+  flex-shrink: var(--flex-shrink, --_flex-shrink);
+  flex-wrap: var(--flex-wrap, --_flex-wrap);
+  flex:  var(--flex, --_flex);
+  flex: var(--flex-grow, 0) var(--flex-shrink, 1) var(--flex-basis, auto);
+  float: var(--float, --_float);
+  flood-color: var(--flood-color, --_flood-color);
+  flood-opacity: var(--flood-opacity, --_flood-opacity);
+  font-family: var(--font-family, --_font-family);
+  font-feature-settings: var(--font-feature-settings, --_font-feature-settings);
+  font-kerning: var(--font-kerning, --_font-kerning);
+  font-language-override: var(--font-language-override, --_font-language-override);
+  font-optical-sizing: var(--font-optical-sizing, --_font-optical-sizing);
+  font-palette: var(--font-palette, --_font-palette);
+  font-size-adjust: var(--font-size-adjust, --_font-size-adjust);
+  font-size: var(--font-size, --_font-size);
+  font-smooth: var(--font-smooth, --_font-smooth);
+  font-stretch: var(--font-stretch, --_font-stretch);
+  font-style: var(--font-style, --_font-style);
+  font-synthesis-position: var(--font-synthesis-position, --_font-synthesis-position);
+  font-synthesis-small-caps: var(--font-synthesis-small-caps, --_font-synthesis-small-caps);
+  font-synthesis-style: var(--font-synthesis-style, --_font-synthesis-style);
+  font-synthesis-weight: var(--font-synthesis-weight, --_font-synthesis-weight);
+  font-synthesis:  var(--font-synthesis, --_font-synthesis);
+  font-synthesis: var(--font-synthesis-weight, weight) var(--font-synthesis-style, style) var(--font-synthesis-small-caps, small-caps) var(--font-synthesis-position, position);
+  font-variant-alternates: var(--font-variant-alternates, --_font-variant-alternates);
+  font-variant-caps: var(--font-variant-caps, --_font-variant-caps);
+  font-variant-east-asian: var(--font-variant-east-asian, --_font-variant-east-asian);
+  font-variant-emoji: var(--font-variant-emoji, --_font-variant-emoji);
+  font-variant-ligatures: var(--font-variant-ligatures, --_font-variant-ligatures);
+  font-variant-numeric: var(--font-variant-numeric, --_font-variant-numeric);
+  font-variant-position: var(--font-variant-position, --_font-variant-position);
+  font-variant-settings: var(--font-variant-settings, --_font-variant-settings);
+  font-variant:  var(--font-variant, --_font-variant);
+  font-variant: var(--font-variant-alternates, normal) var(--font-variant-caps, normal) var(--font-variant-east-asian, normal) var(--font-variant-emoji, normal) var(--font-variant-ligatures, normal) var(--font-variant-numeric, normal) var(--font-variant-position, normal);
+  font-weight: var(--font-weight, --_font-weight);
+  font-width: var(--font-width, --_font-width);
+  font:  var(--font, --_font);
+  font: var(--font-style, normal) var(--font-variant, normal) var(--font-weight, normal) var(--font-stretch, normal) var(--font-size, medium) var(--line-height, normal) var(--font-family, sans-serif);
+  forced-color-adjust: var(--forced-color-adjust, --_forced-color-adjust);
+  frame-sizing: var(--frame-sizing, --_frame-sizing);
+  gap:  var(--gap, --_gap);
+  gap: var(--row-gap, normal) var(--column-gap, normal);
+  grid-area:  var(--grid-area, --_grid-area);
+  grid-area: var(--grid-row-start, auto) var(--grid-column-start, auto) var(--grid-row-end, auto) var(--grid-column-end, auto);
+  grid-auto-columns: var(--grid-auto-columns, --_grid-auto-columns);
+  grid-auto-flow: var(--grid-auto-flow, --_grid-auto-flow);
+  grid-auto-rows: var(--grid-auto-rows, --_grid-auto-rows);
+  grid-column-end: var(--grid-column-end, --_grid-column-end);
+  grid-column-start: var(--grid-column-start, --_grid-column-start);
+  grid-column:  var(--grid-column, --_grid-column);
+  grid-column: var(--grid-column-start, auto) var(--grid-column-end, auto);
+  grid-row-end: var(--grid-row-end, --_grid-row-end);
+  grid-row-start: var(--grid-row-start, --_grid-row-start);
+  grid-row:  var(--grid-row, --_grid-row);
+  grid-row: var(--grid-row-start, auto) var(--grid-row-end, auto);
+  grid-template-areas: var(--grid-template-areas, --_grid-template-areas);
+  grid-template-columns: var(--grid-template-columns, --_grid-template-columns);
+  grid-template-rows: var(--grid-template-rows, --_grid-template-rows);
+  grid-template:  var(--grid-template, --_grid-template);
+  grid-template: var(--grid-template-columns, none) var(--grid-template-rows, none) var(--grid-template-areas, none);
+  grid:  var(--grid, --_grid);
+  grid: var(--grid-template-rows, none) var(--grid-template-columns, none) var(--grid-template-areas, none) var(--grid-auto-rows, auto) var(--grid-auto-columns, auto) var(--grid-auto-flow, row) var(--grid-column-gap, 0) var(--grid-row-gap, 0) var(--column-gap, normal) var(--row-gap, normal);
+  hanging-punctuation: var(--hanging-punctuation, --_hanging-punctuation);
+  height: var(--height, --_height);
+  hyphenate-character: var(--hyphenate-character, --_hyphenate-character);
+  hyphenate-limit-chars: var(--hyphenate-limit-chars, --_hyphenate-limit-chars);
+  hyphens: var(--hyphens, --_hyphens);
+  image-orientation: var(--image-orientation, --_image-orientation);
+  image-rendering: var(--image-rendering, --_image-rendering);
+  image-resolution: var(--image-resolution, --_image-resolution);
+  initial-letter: var(--initial-letter, --_initial-letter);
+  inline-size: var(--inline-size, --_inline-size);
+  inset-block-end: var(--inset-block-end, --_inset-block-end);
+  inset-block-start: var(--inset-block-start, --_inset-block-start);
+  inset-block:  var(--inset-block, --_inset-block);
+  inset-block: var(--inset-block-start, auto) var(--inset-block-end, auto);
+  inset-inline-end: var(--inset-inline-end, --_inset-inline-end);
+  inset-inline-start: var(--inset-inline-start, --_inset-inline-start);
+  inset-inline:  var(--inset-inline, --_inset-inline);
+  inset-inline: var(--inset-inline-start, auto) var(--inset-inline-end, auto);
+  inset:  var(--inset, --_inset);
+  inset: var(--top, auto) var(--bottom, auto) var(--left, auto) var(--right, auto);
+  interactivity: var(--interactivity, --_interactivity);
+  interest-delay-end: var(--interest-delay-end, --_interest-delay-end);
+  interest-delay-start: var(--interest-delay-start, --_interest-delay-start);
+  interest-delay: var(--interest-delay, --_interest-delay);
+  interpolate-size: var(--interpolate-size, --_interpolate-size);
+  isolation: var(--isolation, --_isolation);
+  justify-content: var(--justify-content, --_justify-content);
+  justify-items: var(--justify-items, --_justify-items);
+  justify-self: var(--justify-self, --_justify-self);
+  left: var(--left, --_left);
+  letter-spacing: var(--letter-spacing, --_letter-spacing);
+  lighting-color: var(--lighting-color, --_lighting-color);
+  line-break: var(--line-break, --_line-break);
+  line-clamp: var(--line-clamp, --_line-clamp);
+  line-height-step: var(--line-height-step, --_line-height-step);
+  line-height: var(--line-height, --_line-height);
+  list-style-image: var(--list-style-image, --_list-style-image);
+  list-style-position: var(--list-style-position, --_list-style-position);
+  list-style-type: var(--list-style-type, --_list-style-type);
+  list-style:  var(--list-style, --_list-style);
+  list-style: var(--list-style-type, disc) var(--list-style-position, outside) var(--list-style-image, none);
+  margin-block-end: var(--margin-block-end, --_margin-block-end);
+  margin-block-start: var(--margin-block-start, --_margin-block-start);
+  margin-block:  var(--margin-block, --_margin-block);
+  margin-block: var(--margin-block-start, 0) var(--margin-block-end, 0);
+  margin-bottom: var(--margin-bottom, --_margin-bottom);
+  margin-inine: var(--margin-inline-start, 0) var(--margin-inline-end, 0);
+  margin-inline-end: var(--margin-inline-end, --_margin-inline-end);
+  margin-inline:  var(--margin-inline, --_margin-inline);
+  margin-inline: var(--margin-inline-start, 0) var(--margin-inline-end, 0);
+  margin-left: var(--margin-left, --_margin-left);
+  margin-right: var(--margin-right, --_margin-right);
+  margin-top: var(--margin-top, --_margin-top);
+  margin-trim: var(--margin-trim, --_margin-trim);
+  margin:  var(--margin, --_margin);
+  margin: var(--margin-top, 0) var(--margin-right, 0) var(--margin-bottom, 0) var(--margin-left, 0);
+  marker-end: var(--marker-end, --_marker-end);
+  marker-mid: var(--marker-mid, --_marker-mid);
+  marker-start: var(--marker-start, --_marker-start);
+  marker: var(--marker, --_marker);
+  mask-border-mode: var(--mask-border-mode, --_mask-border-mode);
+  mask-border-outset: var(--mask-border-outset, --_mask-border-outset);
+  mask-border-repeat: var(--mask-border-repeat, --_mask-border-repeat);
+  mask-border-slice: var(--mask-border-slice, --_mask-border-slice);
+  mask-border-source: var(--mask-border-source, --_mask-border-source);
+  mask-border-width: var(--mask-border-width, --_mask-border-width);
+  mask-border:  var(--mask-border, --_mask-border);
+  mask-border: var(--mask-border-mode, alpha) var(--mask-border-outset, 0) var(--mask-border-repeat, stretch) var(--mask-border-slice, 0) var(--mask-border-source, none) var(--mask-border-width, auto);
+  mask-clip: var(--mask-clip, --_mask-clip);
+  mask-composite: var(--mask-composite, --_mask-composite);
+  mask-image: var(--mask-image, --_mask-image);
+  mask-mode: var(--mask-mode, --_mask-mode);
+  mask-origin: var(--mask-origin, --_mask-origin);
+  mask-position: var(--mask-position, --_mask-position);
+  mask-repeat: var(--mask-repeat, --_mask-repeat);
+  mask-size: var(--mask-size, --_mask-size);
+  mask-type: var(--mask-type, --_mask-type);
+  mask:  var(--mask, --_mask);
+  mask: var(--mask-image, none) var(--mask-mode, match-source) var(--mask-repeat, repeat) var(--mask-position, 0% 0%) var(--mask-clip, border-box) var(--mask-origin, border-box) var(--mask-size, auto) var(--mask-composite, add);
+  math-depth: var(--math-depth, --_math-depth);
+  math-shift: var(--math-shift, --_math-shift);
+  math-style: var(--math-style, --_math-style);
+  max-block-size: var(--max-block-size, --_max-block-size);
+  max-height: var(--max-height, --_max-height);
+  max-inline-size: var(--max-inline-size, --_max-inline-size);
+  max-width: var(--max-width, --_max-width);
+  min-block-size: var(--min-block-size, --_min-block-size);
+  min-height: var(--min-height, --_min-height);
+  min-inline-size: var(--min-inline-size, --_min-inline-size);
+  min-width: var(--min-width, --_min-width);
+  mix-blend-mode: var(--mix-blend-mode, --_mix-blend-mode);
+  object-fit: var(--object-fit, --_object-fit);
+  object-position: var(--object-position, --_object-position);
+  object-view-box: var(--object-view-box, --_object-view-box);
+  offset-anchor: var(--offset-anchor, --_offset-anchor);
+  offset-distance: var(--offset-distance, --_offset-distance);
+  offset-path: var(--offset-path, --_offset-path);
+  offset-position: var(--offset-position, --_offset-position);
+  offset-rotate: var(--offset-rotate, --_offset-rotate);
+  offset: var(--offset-position, normal) var(--offset-path, none) var(--offset-distance, 0) var(--offset-anchor, auto) var(--offset-rotate, auto);
+  offset:  var(--offset, --_offset);
+  opacity: var(--opacity, --_opacity);
+  order: var(--order, --_order);
+  orphans: var(--orphans, --_orphans);
+  outline-color: var(--outline-color, --_outline-color);
+  outline-offset: var(--outline-offset, --_outline-offset);
+  outline-style: var(--outline-style, --_outline-style);
+  outline-width: var(--outline-width, --_outline-width);
+  outline:  var(--outline, --_outline);
+  outline: var(--outline-width, medium) var(--outline-style, none) var(--outline-color, auto);
+  overflow-anchor: var(--overflow-anchor, --_overflow-anchor);
+  overflow-block: var(--overflow-block, --_overflow-block);
+  overflow-clip-margin: var(--overflow-clip-margin, --_overflow-clip-margin);
+  overflow-inline: var(--overflow-inline, --_overflow-inline);
+  overflow-wrap: var(--overflow-wrap, --_overflow-wrap);
+  overflow-x: var(--overflow-x, --_overflow-x);
+  overflow-y: var(--overflow-y, --_overflow-y);
+  overflow:  var(--overflow, --_overflow);
+  overflow: var(--overflow-x, visible) var(--overflow-y, visible);
+  overlay: var(--overlay, --_overlay);
+  overscroll-behavior-block: var(--overscroll-behavior-block, --_overscroll-behavior-block);
+  overscroll-behavior-inline: var(--overscroll-behavior-inline, --_overscroll-behavior-inline);
+  overscroll-behavior-x: var(--overscroll-behavior-x, --_overscroll-behavior-x);
+  overscroll-behavior-y: var(--overscroll-behavior-y, --_overscroll-behavior-y);
+  overscroll-behavior:  var(--overscroll-behavior, --_overscroll-behavior);
+  overscroll-behavior: var(--overscroll-behavior-x, auto) var(--overscroll-behavior-y, auto);
+  padding-block-end: var(--padding-block-end, --_padding-block-end);
+  padding-block-start: var(--padding-block-start, --_padding-block-start);
+  padding-block:  var(--padding-block, --_padding-block);
+  padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  padding-bottom: var(--padding-bottom, --_padding-bottom);
+  padding-inline-end: var(--padding-inline-end, --_padding-inline-end);
+  padding-inline-start: var(--padding-inline-start, --_padding-inline-start);
+  padding-inline:  var(--padding-inline, --_padding-inline);
+  padding-inline: var(--padding-inline-start, 0) var(--padding-inline-end, 0);
+  padding-left: var(--padding-left, --_padding-left);
+  padding-right: var(--padding-right, --_padding-right);
+  padding-top: var(--padding-top, --_padding-top);
+  padding:  var(--padding, --_padding);
+  padding: var(--padding-top, 0) var(--padding-right, 0) var(--padding-bottom, 0) var(--padding-left, 0);
+  page: var(--page, --_page);
+  paint-order: var(--paint-order, --_paint-order);
+  path-length: var(--path-length, --_path-length);
+  perspective-origin: var(--perspective-origin, --_perspective-origin);
+  perspective: var(--perspective, --_perspective);
+  place-content:  var(--place-content, --_place-content);
+  place-content: var(--align-content, normal) var(--justify-content, normal);
+  place-items:  var(--place-items, --_place-items);
+  place-items: var(--align-items, normal) var(--justify-items, legacy);
+  place-self:  var(--place-self, --_place-self);
+  place-self: var(--align-self, auto) var(--justify-self, auto);
+  pointer-events: var(--pointer-events, --_pointer-events);
+  position-anchor: var(--position-anchor, --_position-anchor);
+  position-area: var(--position-area, --_position-area);
+  position-try-fallbacks: var(--position-try-fallbacks, --_position-try-fallbacks);
+  position-try-order: var(--position-try-order, --_position-try-order);
+  position-try:  var(--position-try, --_position-try);
+  position-try: var(--position-try-fallbacks, none) var(--position-try-order, normal);
+  position-visibility: var(--position-visibility, --_position-visibility);
+  position: var(--position, --_position);
+  print-color-adjust: var(--print-color-adjust, --_print-color-adjust);
+  quotes: var(--quotes, --_quotes);
+  r: var(--r, --_r);
+  reading-flow: var(--reading-flow, --_reading-flow);
+  reading-order: var(--reading-order, --_reading-order);
+  resize: var(--resize, --_resize);
+  right: var(--right, --_right);
+  rotate: var(--rotate, --_rotate);
+  row-gap: var(--row-gap, --_row-gap);
+  row-rule-color: var(--row-rule-color, --_row-rule-color);
+  row-rule-style: var(--row-rule-style, --_row-rule-style);
+  row-rule-visibility-items: var(--row-rule-visibility-items, --_row-rule-visibility-items);
+  row-rule-width: var(--row-rule-width, --_row-rule-width);
+  row-rule: var(--row-rule, --_row-rule);
+  ruby-align: var(--ruby-align, --_ruby-align);
+  ruby-overhang: var(--ruby-overhang, --_ruby-overhang);
+  ruby-position: var(--ruby-position, --_ruby-position);
+  rule-visibility-items: var(--rule-visibility-items, --_rule-visibility-items);
+  rx: var(--rx, --_rx);
+  ry: var(--ry, --_ry);
+  scale: var(--scale, --_scale);
+  scroll-behavior: var(--scroll-behavior, --_scroll-behavior);
+  scroll-initial-target: var(--scroll-initial-target, --_scroll-initial-target);
+  scroll-margin-block-end: var(--scroll-margin-block-end, --_scroll-margin-block-end);
+  scroll-margin-block-start: var(--scroll-margin-block-start, --_scroll-margin-block-start);
+  scroll-margin-block:  var(--scroll-margin-block, --_scroll-margin-block);
+  scroll-margin-block: var(--scroll-margin-block-start, 0) var(--scroll-margin-block-end, 0);
+  scroll-margin-inline-end: var(--scroll-margin-inline-end, --_scroll-margin-inline-end);
+  scroll-margin-inline-start: var(--scroll-margin-inline-start, --_scroll-margin-inline-start);
+  scroll-margin-inline:  var(--scroll-margin-inline, --_scroll-margin-inline);
+  scroll-margin-inline: var(--scroll-margin-inline-start, 0) var(--_scroll-margin-inline-end, 0);
+  scroll-margin-left: var(--scroll-margin-left, --_scroll-margin-left);
+  scroll-margin-right: var(--scroll-margin-right, --_scroll-margin-right);
+  scroll-margin-top: var(--scroll-margin-top, --_scroll-margin-top);
+  scroll-margin:  var(--scroll-margin, --_scroll-margin);
+  scroll-margin: var(--scroll-margin-top, 0) var(--scroll-margin-right, 0) var(--scroll-margin-bottom, 0) var(--scroll-margin-left, 0);
+  scroll-marker-group: var(--scroll-marker-group, --_scroll-marker-group);
+  scroll-padding-block-end: var(--scroll-padding-block-end, --_scroll-padding-block-end);
+  scroll-padding-block-start: var(--scroll-padding-block-start, --_scroll-padding-block-start);
+  scroll-padding-block:  var(--scroll-padding-block, --_scroll-padding-block);
+  scroll-padding-block: var(--scroll-padding-block-start, auto) var(--scroll-padding-block-end, auto);
+  scroll-padding-bottom: var(--scroll-padding-bottom, --_scroll-padding-bottom);
+  scroll-padding-inline-end: var(--scroll-padding-inline-end, --_scroll-padding-inline-end);
+  scroll-padding-inline-start: var(--scroll-padding-inline-start, --_scroll-padding-inline-start);
+  scroll-padding-inline:  var(--scroll-padding-inline, --_scroll-padding-inline);
+  scroll-padding-inline: var(--scroll-padding-inline-start, auto) var(--scroll-padding-inline-end, auto);
+  scroll-padding-left: var(--scroll-padding-inline-start, --_scroll-padding-inline-start);
+  scroll-padding-right: var(--scroll-padding-inline-end, --_scroll-padding-inline-end);
+  scroll-padding-top: var(--scroll-padding-block-start, --_scroll-padding-block-start);
+  scroll-padding:  var(--scroll-padding, --_scroll-padding);
+  scroll-padding: var(--scroll-padding-top, auto) var(--scroll-padding-right, auto) var(--scroll-padding-bottom, auto) var(--scroll-padding-left, auto);
+  scroll-snap-align: var(--scroll-snap-align, --_scroll-snap-align);
+  scroll-snap-stop: var(--scroll-snap-stop, --_scroll-snap-stop);
+  scroll-snap-type: var(--scroll-snap-type, --_scroll-snap-type);
+  scroll-target-group: var(--scroll-target-group, --_scroll-target-group);
+  scroll-timeline-axis: var(--scroll-timeline-axis, --_scroll-timeline-axis);
+  scroll-timeline-name: var(--scroll-timeline-name, --_scroll-timeline-name);
+  scroll-timeline:  var(--scroll-timeline, --_scroll-timeline);
+  scroll-timeline: var(--scroll-timeline-name, none) var(--scroll-timeline-axis, block);
+  scrollbar-color: var(--scrollbar-color, --_scrollbar-color);
+  scrollbar-gutter: var(--scrollbar-gutter, --_scrollbar-gutter);
+  scrollbar-width: var(--scrollbar-width, --_scrollbar-width);
+  shape-image-threshold: var(--shape-image-threshold, --_shape-image-threshold);
+  shape-margin: var(--shape-margin, --_shape-margin);
+  shape-outside: var(--shape-outside, --_shape-outside);
+  shape-rendering: var(--shape-rendering, --_shape-rendering);
+  speak-as: var(--speak-as, --_speak-as);
+  stop-color: var(--stop-color, --_stop-color);
+  stop-opacity: var(--stop-opacity, --_stop-opacity);
+  stroke-dasharray: var(--stroke-dasharray, --_stroke-dasharray);
+  stroke-dashoffset: var(--stroke-dashoffset, --_stroke-dashoffset);
+  stroke-linecap: var(--stroke-linecap, --_stroke-linecap);
+  stroke-linejoin: var(--stroke-linejoin, --_stroke-linejoin);
+  stroke-miterlimit: var(--stroke-miterlimit, --_stroke-miterlimit);
+  stroke-opacity: var(--stroke-opacity, --_stroke-opacity);
+  stroke-width: var(--stroke-width, --_stroke-width);
+  stroke: var(--stroke, --_stroke);
+  tab-size: var(--tab-size, --_tab-size);
+  table-layout: var(--table-layout, --_table-layout);
+  text-align-last: var(--text-align-last, --_text-align-last);
+  text-align: var(--text-align, --_text-align);
+  text-anchor: var(--text-anchor, --_text-anchor);
+  text-autospace: var(--text-autospace, --_text-autospace);
+  text-box-edge: var(--text-box-edge, --_text-box-edge);
+  text-box-trim: var(--text-box-trim, --_text-box-trim);
+  text-box:  var(--text-box, --_text-box);
+  text-box: var(--text-box-trim, normal) var(--text-box-edge, normal);
+  text-combine-upright: var(--text-combine-upright, --_text-combine-upright);
+  text-decoration-color: var(--text-decoration-color, --_text-decoration-color);
+  text-decoration-inset: var(--text-decoration-inset, --_text-decoration-inset);
+  text-decoration-line: var(--text-decoration-line, --_text-decoration-line);
+  text-decoration-skip-ink: var(--text-decoration-skip-ink, --_text-decoration-skip-ink);
+  text-decoration-style: var(--text-decoration-style, --_text-decoration-style);
+  text-decoration-thickness: var(--text-decoration-thickness, --_text-decoration-thickness);
+  text-decoration:  var(--text-decoration, --_text-decoration);
+  text-decoration: var(--text-decoration-line, none) var(--text-decoration-style, solid) var(--text-decoration-color, currentcolor);
+  text-emphasis-color: var(--text-emphasis-color, --_text-emphasis-color);
+  text-emphasis-position: var(--text-emphasis-position, --_text-emphasis-position);
+  text-emphasis-style: var(--text-emphasis-style, --_text-emphasis-style);
+  text-emphasis:  var(--text-emphasis, --_text-emphasis);
+  text-emphasis: var(--text-emphasis-style, none) var(--text-emphasis-color, currentcolor);
+  text-indent: var(--text-indent, --_text-indent);
+  text-justify: var(--text-justify, --_text-justify);
+  text-orientation: var(--text-orientation, --_text-orientation);
+  text-overflow: var(--text-overflow, --_text-overflow);
+  text-rendering: var(--text-rendering, --_text-rendering);
+  text-shadow: var(--text-shadow, --_text-shadow);
+  text-size-adjust: var(--text-size-adjust, --_text-size-adjust);
+  text-spacing-trim: var(--text-spacing-trim, --_text-spacing-trim);
+  text-transform: var(--text-transform, --_text-transform);
+  text-underline-offset: var(--text-underline-offset, --_text-underline-offset);
+  text-underline-position: var(--text-underline-position, --_text-underline-position);
+  text-wrap-mode: var(--text-wrap-mode, --_text-wrap-mode);
+  text-wrap-style: var(--text-wrap-style, --_text-wrap-style);
+  text-wrap:  var(--text-wrap, --_text-wrap);
+  text-wrap: var(--text-wrap-mode, wrap) var(--text-wrap-style, wrap);
+  timeline-scope: var(--timeline-scope, --_timeline-scope);
+  top: var(--top, --_top);
+  touch-action: var(--touch-action, --_touch-action);
+  transform-box: var(--transform-box, --_transform-box);
+  transform-origin: var(--transform-origin, --_transform-origin);
+  transform-style: var(--transform-style, --_transform-style);
+  transform: var(--transform, --_transform);
+  transition-behavior: var(--transition-behavior, --_transition-behavior);
+  transition-delay: var(--transition-delay, --_transition-delay);
+  transition-duration: var(--transition-duration, --_transition-duration);
+  transition-property: var(--transition-property, --_transition-property);
+  transition-timing-function: var(--transition-timing-function, --_transition-timing-function);
+  transition:  var(--transition, --_transition);
+  transition: var(--transition-delay, 0s) var(--transition-duration, 0s) var(--transition-property, all) var(--transition-timing-function, ease) var(--transition-behavior, normal);
+  translate: var(--translate, --_translate);
+  unicode-bidi: var(--unicode-bidi, --_unicode-bidi);
+  user-select: var(--user-select, --_user-select);
+  vector-effect: var(--vector-effect, --_vector-effect);
+  vertical-align:  var(--vertical-align, --_vertical-align);
+  vertical-align: var(--alignment-baseline, baseline) var(--baseline-source, baseline) var(--baseline-shift, baseline);
+  view-timeline-axis: var(--view-timeline-axis, --_view-timeline-axis);
+  view-timeline-inset: var(--view-timeline-inset, --_view-timeline-inset);
+  view-timeline-name: var(--view-timeline-name, --_view-timeline-name);
+  view-timeline:  var(--view-timeline, --_view-timeline);
+  view-timeline: var(--view-timeline-name, none) var(--view-timeline-axis, block);
+  view-transition-class: var(--view-transition-class, --_view-transition-class);
+  view-transition-name: var(--view-transition-name, --_view-transition-name);
+  view-transition-scope: var(--view-transition-scope, --_view-transition-scope);
+  visibility: var(--visibility, --_visibility);
+  white-space-collapse: var(--white-space-collapse, --_white-space-collapse);
+  white-space: var(--white-space, --_white-space);
+  widows: var(--widows, --_widows);
+  width: var(--width, --_width);
+  will-change: var(--will-change, --_will-change);
+  word-break: var(--word-break, --_word-break);
+  writing-mode: var(--writing-mode, --_writing-mode);
+  x: var(--x, --_x);
+  y: var(--y, --_y);
+  z-index: var(--z-index, --_z-index);
+  zoom: var(--zoom, --_zoom);
+}
